@@ -1,0 +1,24 @@
+{
+    "servers": [
+        {
+            "name": "Server1",
+            "jmxHost": "localhost",
+            "jmxPort": "9520",
+            "jmxUser": "",
+            "jmxPassword": "",
+            "nameDiscovery": "false",
+            "trackUniqueClients": "false",
+            "intervalInMillis": "5000"
+        },
+        {
+            "name": "Server2",
+            "jmxHost": "localhost",
+            "jmxPort": "9620",
+            "jmxUser": "",
+            "jmxPassword": "",
+            "nameDiscovery": "false",
+            "trackUniqueClients": "false",
+            "intervalInMillis": "5000"
+        }
+    ]
+}
