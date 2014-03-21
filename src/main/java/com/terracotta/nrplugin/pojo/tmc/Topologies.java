@@ -14,7 +14,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Topologies extends TmcBase implements Serializable {
+public class Topologies extends TmcBase {
 
     private static final long serialVersionUID = 8106596157713698078L;
 

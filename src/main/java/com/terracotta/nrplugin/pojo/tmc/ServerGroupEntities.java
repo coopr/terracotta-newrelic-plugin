@@ -14,7 +14,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ServerGroupEntities extends TmcBase implements Serializable {
+public class ServerGroupEntities extends TmcBase {
 
     private static final long serialVersionUID = 4543561537030333913L;
 

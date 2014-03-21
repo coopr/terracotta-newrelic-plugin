@@ -15,7 +15,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ClientEntities extends TmcBase implements Serializable {
+public class ClientEntities extends TmcBase {
 
     private static final long serialVersionUID = -1440414121520091204L;
 

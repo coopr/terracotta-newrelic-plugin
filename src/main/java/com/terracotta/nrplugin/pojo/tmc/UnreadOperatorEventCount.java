@@ -2,6 +2,8 @@ package com.terracotta.nrplugin.pojo.tmc;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import java.io.Serializable;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Jeff
@@ -9,7 +11,9 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * Time: 10:13 AM
  * To change this template use File | Settings | File Templates.
  */
-public class UnreadOperatorEventCount {
+public class UnreadOperatorEventCount implements Serializable {
+
+    private static final long serialVersionUID = 6663293253666036331L;
 
     int ERROR;
     int CRITICAL;
