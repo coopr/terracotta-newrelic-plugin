@@ -10,9 +10,9 @@
         <level value="debug"/>
     </logger>
 
-    <!--<logger name="org.springframework">-->
-        <!--<level value="debug"/>-->
-    <!--</logger>-->
+    <logger name="org.springframework.web">
+        <level value="debug"/>
+    </logger>
 
     <root level="error">
         <appender-ref ref="STDOUT"/>

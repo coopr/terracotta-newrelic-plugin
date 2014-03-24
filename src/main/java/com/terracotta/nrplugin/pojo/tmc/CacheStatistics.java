@@ -17,4 +17,27 @@ public class CacheStatistics extends TmcBase {
     String cacheManagerName;
     Map<String, Object> attributes;
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCacheManagerName() {
+        return cacheManagerName;
+    }
+
+    public void setCacheManagerName(String cacheManagerName) {
+        this.cacheManagerName = cacheManagerName;
+    }
+
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, Object> attributes) {
+        this.attributes = attributes;
+    }
 }

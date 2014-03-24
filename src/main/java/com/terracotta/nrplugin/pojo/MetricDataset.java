@@ -1,11 +1,9 @@
 package com.terracotta.nrplugin.pojo;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.Serializable;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,18 +15,18 @@ import java.util.List;
 public class MetricDataset implements Serializable {
 
     private static final long serialVersionUID = 483809302495395084L;
+    public static final int WINDOW_SIZE_DEFAULT = 100;
 
-//    List<String> pathComponents = new LinkedList<String>();
-    String path;
-    MetricUnit unit;
+    Metric metric;
     DescriptiveStatistics statistics;
 
     public MetricDataset() {
+        statistics = new DescriptiveStatistics(WINDOW_SIZE_DEFAULT);
     }
 
-    public MetricDataset(String path, MetricUnit unit) {
-        this.path = path;
-        this.unit = unit;
+    public MetricDataset(Metric metric, int windowSize) {
+        this.metric = metric;
+        statistics = new DescriptiveStatistics(windowSize);
     }
 
 //    public MetricDataset addPath(String pathComponent) {
@@ -45,7 +43,7 @@ public class MetricDataset implements Serializable {
     }
 
     public String getKey() {
-        return getPath() + "[" + unit + "]";
+        return metric.getReportedPath() + "[" + metric.getUnit() + "]";
     }
 
 //    public String getPath() {
@@ -58,20 +56,16 @@ public class MetricDataset implements Serializable {
 //        return path;
 //    }
 
-    public String getPath() {
-        return path;
+
+    public Metric getMetric() {
+        return metric;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public void setMetric(Metric metric) {
+        this.metric = metric;
     }
 
-    public MetricUnit getUnit() {
-        return unit;
+    public void setStatistics(DescriptiveStatistics statistics) {
+        this.statistics = statistics;
     }
-
-    public void setUnit(MetricUnit unit) {
-        this.unit = unit;
-    }
-
 }

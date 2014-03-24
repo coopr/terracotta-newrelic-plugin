@@ -1,7 +1,6 @@
 package com.terracotta.nrplugin.cache.manager;
 
 import com.terracotta.nrplugin.pojo.MetricDataset;
-import com.terracotta.nrplugin.pojo.MetricUnit;
 import com.terracotta.nrplugin.util.MetricUtil;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
