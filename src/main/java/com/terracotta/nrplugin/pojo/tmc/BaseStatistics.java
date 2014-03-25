@@ -1,8 +1,5 @@
 package com.terracotta.nrplugin.pojo.tmc;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import java.io.Serializable;
 import java.util.Map;
 
 /**

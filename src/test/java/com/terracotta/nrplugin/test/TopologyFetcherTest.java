@@ -1,7 +1,8 @@
 package com.terracotta.nrplugin.test;
 
-import com.terracotta.nrplugin.app.AppConfig;
-import com.terracotta.nrplugin.cache.manager.StatsCacher;
+import com.terracotta.nrplugin.app.RestConfig;
+import com.terracotta.nrplugin.pojo.tmc.Topologies;
+import com.terracotta.nrplugin.rest.tmc.TopologyFetcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -10,26 +11,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Jeff
- * Date: 3/24/14
- * Time: 9:25 AM
+ * Date: 3/20/14
+ * Time: 9:15 AM
  * To change this template use File | Settings | File Templates.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {AppConfig.class})
-public class StatsCacherTest {
+@ContextConfiguration(classes = {RestConfig.class})
+public class TopologyFetcherTest {
 
     final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    StatsCacher statsCacher;
+    TopologyFetcher topologyFetcher;
 
     @Test
     public void test() {
-        log.info("Testing statsCacher...");
-        statsCacher.cacheStats();
+        log.info("Getting topologies...");
+        List<Topologies> topologies = topologyFetcher.getTopologies();
+        log.info(topologies.toString());
     }
 
 }

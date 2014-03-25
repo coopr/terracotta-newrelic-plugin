@@ -1,6 +1,5 @@
 package com.terracotta.nrplugin.app;
 
-import net.sf.ehcache.management.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
@@ -9,8 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.ehcache.EhCacheCacheManager;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
@@ -20,14 +17,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 @Configuration
 @EnableAutoConfiguration
 @EnableAsync
 @EnableScheduling
-@ComponentScan(basePackages = {"com.terracotta"})
-//@Import({ProdConfigs.class, MockConfigs.class})
+@ComponentScan(basePackages = {"com.terracotta"},
+        excludeFilters = @ComponentScan.Filter(pattern = {"*Mock*"}, type = FilterType.REGEX))
 @PropertySource("classpath:application.properties")
 public class AppConfig implements CommandLineRunner {
 

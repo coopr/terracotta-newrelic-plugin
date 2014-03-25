@@ -33,7 +33,7 @@ public class Metric implements Serializable {
     }
 
     public String getName() {
-        String[] split = reportedPath.split(MetricUtil.PATH_SEPARATOR);
+        String[] split = reportedPath.split(MetricUtil.NEW_RELIC_PATH_SEPARATOR);
         return split.length > 0 ? split[split.length - 1] : null;
     }
 

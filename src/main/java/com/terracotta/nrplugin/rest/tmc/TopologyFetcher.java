@@ -1,8 +1,8 @@
-package com.terracotta.nrplugin.rest.manager;
+package com.terracotta.nrplugin.rest.tmc;
 
 import com.terracotta.nrplugin.pojo.tmc.Topologies;
+import com.terracotta.nrplugin.rest.RestClientBase;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -13,8 +13,8 @@ import java.util.List;
  * Time: 8:55 AM
  * To change this template use File | Settings | File Templates.
  */
-@Service
-public class TopologyManager extends RestClientBase {
+//@Service
+public class TopologyFetcher extends RestClientBase {
 
     List<Topologies> topologies;
 

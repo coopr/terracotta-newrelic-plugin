@@ -1,8 +1,9 @@
-package com.terracotta.nrplugin.rest.manager;
+package com.terracotta.nrplugin.rest.tmc;
 
 import com.terracotta.nrplugin.pojo.tmc.CacheStatistics;
 import com.terracotta.nrplugin.pojo.tmc.ClientStatistics;
 import com.terracotta.nrplugin.pojo.tmc.ServerStatistics;
+import com.terracotta.nrplugin.rest.RestClientBase;
 import com.terracotta.nrplugin.util.MetricUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,7 +11,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +23,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 @Service
-public class StatsFetcher extends RestClientBase {
+public class MetricFetcher extends RestClientBase {
 
     MultiValueMap<String, String> requestParams = new LinkedMultiValueMap<String, String>();
 

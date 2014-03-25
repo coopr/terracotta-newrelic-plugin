@@ -3,8 +3,6 @@ package com.terracotta.nrplugin.pojo.tmc;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
 
 /**

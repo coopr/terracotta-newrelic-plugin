@@ -4,7 +4,7 @@ import com.terracotta.nrplugin.app.RestConfig;
 import com.terracotta.nrplugin.pojo.tmc.CacheStatistics;
 import com.terracotta.nrplugin.pojo.tmc.ClientStatistics;
 import com.terracotta.nrplugin.pojo.tmc.ServerStatistics;
-import com.terracotta.nrplugin.rest.manager.StatsFetcher;
+import com.terracotta.nrplugin.rest.tmc.MetricFetcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -29,21 +29,21 @@ import java.util.List;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {RestConfig.class})
-public class StatsFetcherTest {
+public class MetricFetcherTest {
 
     final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    StatsFetcher statsFetcher;
+    MetricFetcher metricFetcher;
 
     @Test
     public void test() {
         log.info("Getting server stats...");
-        List<ServerStatistics> serverStatisticsList = statsFetcher.getServerStatistics();
+        List<ServerStatistics> serverStatisticsList = metricFetcher.getServerStatistics();
         log.info("Getting client stats...");
-        List<ClientStatistics> clientStatisticsList = statsFetcher.getClientStatistics();
+        List<ClientStatistics> clientStatisticsList = metricFetcher.getClientStatistics();
         log.info("Getting cache stats...");
-        List<CacheStatistics> cacheStatisticsList = statsFetcher.getCacheStatistics();
+        List<CacheStatistics> cacheStatisticsList = metricFetcher.getCacheStatistics();
         log.info("Done.");
     }
 

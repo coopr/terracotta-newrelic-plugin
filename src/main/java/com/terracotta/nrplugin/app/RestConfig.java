@@ -1,8 +1,6 @@
 package com.terracotta.nrplugin.app;
 
-import com.terracotta.nrplugin.rest.manager.TopologyManager;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -19,10 +17,5 @@ import org.springframework.context.annotation.PropertySource;
 @ComponentScan(basePackages = {"com.terracotta.nrplugin.rest"})
 @PropertySource("classpath:application.properties")
 public class RestConfig {
-
-//    @Bean
-//    TopologyManager topologyManager() {
-//        return new TopologyManager();
-//    }
 
 }

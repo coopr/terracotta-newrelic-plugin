@@ -1,8 +1,11 @@
 package com.terracotta.nrplugin.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.terracotta.nrplugin.pojo.Metric;
-import com.terracotta.nrplugin.pojo.ReportedMetric;
-import com.terracotta.nrplugin.pojo.StatsBundle;
+import com.terracotta.nrplugin.pojo.MetricDataset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -17,6 +20,8 @@ import java.util.*;
  */
 @Service
 public class MetricUtil {
+
+    final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public static final String PARAMETER_SHOW = "show";
 
@@ -52,10 +57,18 @@ public class MetricUtil {
     public static final String METRIC_SIZE = "Size";
     public static final String METRIC_ENABLED = "Enabled";
 
-    public static final String PATH_SEPARATOR = "\\/";
+    // NewRelic constants
+
+    public static final String NEW_RELIC_PATH_SEPARATOR = "\\/";
+    public static final String NEW_RELIC_MIN = "min";
+    public static final String NEW_RELIC_MAX = "max";
+    public static final String NEW_RELIC_TOTAL = "total";
+    public static final String NEW_RELIC_COUNT = "count";
+    public static final String NEW_RELIC_SUM_OF_SQUARES = "sum_of_squares";
 
     List<String> cacheStatsNames = new ArrayList<String>();
     List<Metric> metrics = new ArrayList<Metric>();
+    ObjectMapper mapper = new ObjectMapper();
 
     @PostConstruct
     private void init() {
@@ -146,17 +159,39 @@ public class MetricUtil {
         return cacheStatsNames;
     }
 
-//    public Collection<ReportedMetric> toMetrics(StatsBundle statsBundle) {
-//        List<ReportedMetric> reportedMetrics = new ArrayList<ReportedMetric>();
-//        return reportedMetrics;
-//    }
+    public Map<String, Object> metricsAsJson(Collection<MetricDataset> metrics) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        for (MetricDataset metricDataset : metrics) {
+            try {
+                Map.Entry<String, Map<String, Number>> entry = metricAsJson(metricDataset);
+                map.put(entry.getKey(), entry.getValue());
+            } catch (Exception e) {
+                log.error("Error marshalling metric to JSON.", e);
+            }
+        }
+        return map;
+    }
+
+    public Map.Entry<String, Map<String, Number>> metricAsJson(MetricDataset metricDataset)
+            throws JsonProcessingException {
+//        Map<String, Map<String, Number>> metric = new HashMap<String, Map<String, Number>>();
+        Map<String, Number> values = new HashMap<String, Number>();
+        values.put(NEW_RELIC_MIN, metricDataset.getStatistics().getMin());
+        values.put(NEW_RELIC_MAX, metricDataset.getStatistics().getMax());
+        values.put(NEW_RELIC_TOTAL, metricDataset.getStatistics().getSum());
+        values.put(NEW_RELIC_COUNT, metricDataset.getStatistics().getN());
+        values.put(NEW_RELIC_SUM_OF_SQUARES, metricDataset.getStatistics().getSumsq());
+//        metric.put(metricDataset.getKey(), values);
+        return new AbstractMap.SimpleEntry<String, Map<String, Number>>(metricDataset.getKey(), values);
+//        return mapper.writeValueAsString(metric);
+    }
 
     public String toMetricPath(String... values) {
         String path = "";
         Iterator<String> i = Arrays.asList(values).iterator();
         while (i.hasNext()) {
             path += i.next();
-            if (i.hasNext()) path += PATH_SEPARATOR;
+            if (i.hasNext()) path += NEW_RELIC_PATH_SEPARATOR;
         }
         return path;
     }

@@ -1,4 +1,4 @@
-package com.terracotta.nrplugin.rest.manager;
+package com.terracotta.nrplugin.rest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,11 +15,14 @@ import org.springframework.web.client.RestTemplate;
  */
 public abstract class RestClientBase {
 
-    final Logger log = LoggerFactory.getLogger(this.getClass());
+    protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+    protected RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 
     @Value("${com.saggs.terracotta.nrplugin.tmc.url}")
-    String tmcUrl;
+    protected String tmcUrl;
+
+    @Value("${com.saggs.terracotta.nrplugin.nr.url}")
+    protected String nrUrl;
 
 }

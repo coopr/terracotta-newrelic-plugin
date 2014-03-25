@@ -1,7 +1,7 @@
 package com.terracotta.nrplugin.pojo;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.springframework.beans.factory.annotation.Value;
+import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 
 import java.io.Serializable;
 
@@ -18,54 +18,48 @@ public class MetricDataset implements Serializable {
     public static final int WINDOW_SIZE_DEFAULT = 100;
 
     Metric metric;
-    DescriptiveStatistics statistics;
+    SynchronizedDescriptiveStatistics statistics;
+    long lastUpdate;
 
     public MetricDataset() {
-        statistics = new DescriptiveStatistics(WINDOW_SIZE_DEFAULT);
+        statistics = new SynchronizedDescriptiveStatistics(WINDOW_SIZE_DEFAULT);
     }
 
     public MetricDataset(Metric metric, int windowSize) {
         this.metric = metric;
-        statistics = new DescriptiveStatistics(windowSize);
+        statistics = new SynchronizedDescriptiveStatistics(windowSize);
     }
-
-//    public MetricDataset addPath(String pathComponent) {
-//        pathComponents.add(pathComponent);
-//        return this;
-//    }
 
     public void addValue(double value) {
         statistics.addValue(value);
-    }
-
-    public DescriptiveStatistics getStatistics() {
-        return statistics;
+        lastUpdate = System.currentTimeMillis();
     }
 
     public String getKey() {
         return metric.getReportedPath() + "[" + metric.getUnit() + "]";
     }
 
-//    public String getPath() {
-//        String path = "";
-//        Iterator<String> i = pathComponents.iterator();
-//        while (i.hasNext()) {
-//            path += i.next();
-//            if (i.hasNext()) path += "\\/";
-//        }
-//        return path;
-//    }
-
+    public Double getLastValue() {
+        return statistics.getElement((int) statistics.getN() - 1);
+    }
 
     public Metric getMetric() {
         return metric;
     }
 
-    public void setMetric(Metric metric) {
-        this.metric = metric;
+    public DescriptiveStatistics getStatistics() {
+        return statistics;
     }
 
-    public void setStatistics(DescriptiveStatistics statistics) {
-        this.statistics = statistics;
+    public long getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(long lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
+    public void setMetric(Metric metric) {
+        this.metric = metric;
     }
 }

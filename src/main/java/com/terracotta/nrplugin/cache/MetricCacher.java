@@ -1,10 +1,9 @@
-package com.terracotta.nrplugin.cache.manager;
+package com.terracotta.nrplugin.cache;
 
 import com.jayway.jsonpath.JsonPath;
 import com.terracotta.nrplugin.pojo.Metric;
 import com.terracotta.nrplugin.pojo.MetricDataset;
-import com.terracotta.nrplugin.pojo.tmc.ClientStatistics;
-import com.terracotta.nrplugin.rest.manager.StatsFetcher;
+import com.terracotta.nrplugin.rest.tmc.MetricFetcher;
 import com.terracotta.nrplugin.util.MetricUtil;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -17,7 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -28,7 +26,7 @@ import java.util.concurrent.ExecutorService;
  * To change this template use File | Settings | File Templates.
  */
 @Service
-public class StatsCacher {
+public class MetricCacher {
 
     final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -36,7 +34,7 @@ public class StatsCacher {
     ExecutorService executorService;
 
     @Autowired
-    StatsFetcher statsFetcher;
+    MetricFetcher metricFetcher;
 
     @Autowired
     MetricUtil metricUtil;
@@ -50,9 +48,9 @@ public class StatsCacher {
     @Scheduled(fixedDelay=30000, initialDelay = 500)
     public void cacheStats() {
         log.info("Starting to cache all stats...");
-        String serverJson = statsFetcher.getServerStatisticsAsString();
-        String clientJson = statsFetcher.getClientStatisticsAsString();
-        String cacheJson = statsFetcher.getCacheStatisticsAsString();
+        String serverJson = metricFetcher.getServerStatisticsAsString();
+        String clientJson = metricFetcher.getClientStatisticsAsString();
+        String cacheJson = metricFetcher.getCacheStatisticsAsString();
 
         for (Metric metric : metricUtil.getMetrics()) {
             if (Metric.Source.server.equals(metric.getSource())) {
@@ -79,47 +77,6 @@ public class StatsCacher {
         }
         log.info("Done caching stats.");
     }
-
-//    public void cacheServerStats() {
-//        List<ServerStatistics> serverStatisticsList = statsFetcher.getServerStatistics();
-//        String baseKey = metricUtil.toMetricPath("Component", "Terracotta", "Servers");
-//        for (ServerStatistics serverStatistics : serverStatisticsList) {
-//            Map storageStats = (Map) serverStatistics.getStatistics().get("StorageStats");
-//            Map data = (Map) storageStats.get("DATA");
-//            Map offheap = (Map) storageStats.get("OFFHEAP");
-//            putValue(metricUtil.toMetricPath(baseKey, "Data", "Objects", MetricUtil.METRIC_LIVE_OBJECT_COUNT), Metric.Unit.Count,
-//                    (Integer) serverStatistics.getStatistics().get(MetricUtil.METRIC_LIVE_OBJECT_COUNT));
-//            putValue(metricUtil.toMetricPath(baseKey, "Data", "Tiers", "Heap", MetricUtil.METRIC_USED), Metric.Unit.Bytes,
-//                    (Integer) data.get(MetricUtil.METRIC_USED));
-//            putValue(metricUtil.toMetricPath(baseKey, "Data", "Tiers", "Heap", MetricUtil.METRIC_MAX), Metric.Unit.Bytes,
-//                    (Integer) data.get(MetricUtil.METRIC_MAX));
-//            putValue(metricUtil.toMetricPath(baseKey, "Data", "Tiers", "OffHeap", MetricUtil.METRIC_USED), Metric.Unit.Bytes,
-//                    (Integer) offheap.get(MetricUtil.METRIC_USED));
-//            putValue(metricUtil.toMetricPath(baseKey, "Data", "Tiers", "OffHeap", MetricUtil.METRIC_MAX), Metric.Unit.Bytes,
-//                    (Integer) offheap.get(MetricUtil.METRIC_MAX));
-//        }
-//
-//    }
-
-//    public void cacheClientStats() {
-//        String baseKey = metricUtil.toMetricPath("Component", "Terracotta", "Ehcache", "Clients");
-//        List<ClientStatistics> clientStatisticsList = statsFetcher.getClientStatistics();
-//        for (ClientStatistics clientStatistics : clientStatisticsList) {
-//
-//        }
-//    }
-
-//    public void cacheCacheStats() {
-//        String baseKey = metricUtil.toMetricPath("Component", "Terracotta", "Ehcache", "Clients");
-//        List<CacheStatistics> cacheStatisticsListList = statsFetcher.getCacheStatistics();
-//        for (CacheStatistics cacheStatistics : cacheStatisticsListList) {
-//            String name = cacheStatistics.getName();
-//            for (String statName : metricUtil.getCacheStatsNames()) {
-//                putValue(metricUtil.toMetricPath(baseKey, name, statName), Metric.Unit.Count,
-//                        (Integer) cacheStatistics.getAttributes().get(statName));
-//            }
-//        }
-//    }
 
     private void putValue(Metric metric, Object value) {
         MetricDataset metricDataset = getMetricDataset(metric.getReportedPath());
