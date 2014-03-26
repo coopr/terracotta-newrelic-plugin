@@ -86,7 +86,7 @@ public class MetricReporter extends RestClientBase {
         }
     }
 
-    @Scheduled(fixedDelay=30000, initialDelay = 500)
+    @Scheduled(fixedDelay=30000, initialDelay = 15000)
     public void reportMetrics() {
         NewRelicPayload newRelicPayload = new NewRelicPayload(
                 new Agent(hostname, pid, version),
@@ -96,8 +96,8 @@ public class MetricReporter extends RestClientBase {
 
         HttpHeaders requestHeaders = new HttpHeaders();
         requestHeaders.set(X_LICENSE_KEY, licenseKey);
-        requestHeaders.set(org.apache.http.HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
-        requestHeaders.set(org.apache.http.HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.toString());
+        requestHeaders.set(org.apache.http.HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+        requestHeaders.set(org.apache.http.HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
         HttpEntity<NewRelicPayload> requestEntity = new HttpEntity<NewRelicPayload>(newRelicPayload, requestHeaders);
         HttpEntity<String> response = restTemplate.exchange(nrUrl, HttpMethod.POST, requestEntity, String.class);
 

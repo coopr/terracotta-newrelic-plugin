@@ -23,9 +23,9 @@ import java.util.concurrent.Executors;
 @EnableAsync
 @EnableScheduling
 @ComponentScan(basePackages = {"com.terracotta"},
-        excludeFilters = @ComponentScan.Filter(pattern = {"*Mock*"}, type = FilterType.REGEX))
+        excludeFilters = @ComponentScan.Filter(pattern = {".*Mock.*"}, type = FilterType.REGEX))
 @PropertySource("classpath:application.properties")
-public class AppConfig implements CommandLineRunner {
+public class AppConfig {
 
     static final Logger log = LoggerFactory.getLogger(AppConfig.class);
 
@@ -37,15 +37,6 @@ public class AppConfig implements CommandLineRunner {
         return Executors.newCachedThreadPool();
     }
 
-//    @Resource(name = "props")
-//    private Properties props;
-
-//    @Bean
-//    @Scope("prototype")
-//    public MBeanProxyFactoryBean mBeanProxyFactoryBean() {
-//        return new MBeanProxyFactoryBean();
-//    }
-
     @Autowired
     ResourceLoader resourceLoader;
 
@@ -54,21 +45,6 @@ public class AppConfig implements CommandLineRunner {
         EhCacheManagerFactoryBean bean = new EhCacheManagerFactoryBean();
         bean.setConfigLocation(resourceLoader.getResource("classpath:ehcache.xml"));
         return bean;
-    }
-
-
-    @Override
-    public void run(String... args) {
-        log.info("Initializing NewRelic Agent...");
-    }
-
-    public static void main(String[] args) throws Exception {
-        // no-op
-        log.info("Loading Spring ApplicationContext for Terracotta NewRelic plugin...");
-        SpringApplication app = new SpringApplication(AppConfig.class);
-        app.setWebEnvironment(false);
-        ApplicationContext ctx = app.run(args);
-        log.info("Loaded Spring ApplicationContext.");
     }
 
 }
