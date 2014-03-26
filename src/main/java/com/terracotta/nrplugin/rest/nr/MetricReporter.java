@@ -100,8 +100,6 @@ public class MetricReporter extends RestClientBase {
         requestHeaders.set(org.apache.http.HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
         HttpEntity<NewRelicPayload> requestEntity = new HttpEntity<NewRelicPayload>(newRelicPayload, requestHeaders);
         HttpEntity<String> response = restTemplate.exchange(nrUrl, HttpMethod.POST, requestEntity, String.class);
-
-//        String response = restTemplate.postForObject(nrUrl, newRelicPayload, String.class);
         log.debug("Received response: " + response);
     }
 

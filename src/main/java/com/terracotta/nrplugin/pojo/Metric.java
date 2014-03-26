@@ -69,7 +69,7 @@ public class Metric implements Serializable {
         this.unit = unit;
     }
 
-    public static enum Source {server, client, cache}
+    public static enum Source {server, client, cache, topologies}
 
     public static enum Unit
     {

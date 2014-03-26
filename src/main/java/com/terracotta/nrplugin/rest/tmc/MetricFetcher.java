@@ -1,8 +1,10 @@
 package com.terracotta.nrplugin.rest.tmc;
 
+import com.terracotta.nrplugin.pojo.Metric;
 import com.terracotta.nrplugin.pojo.tmc.CacheStatistics;
 import com.terracotta.nrplugin.pojo.tmc.ClientStatistics;
 import com.terracotta.nrplugin.pojo.tmc.ServerStatistics;
+import com.terracotta.nrplugin.pojo.tmc.Topologies;
 import com.terracotta.nrplugin.rest.RestClientBase;
 import com.terracotta.nrplugin.util.MetricUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.util.MultiValueMap;
 
 import javax.annotation.PostConstruct;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +36,15 @@ public class MetricFetcher extends RestClientBase {
     @PostConstruct
     private void init() {
         requestParams.put(MetricUtil.PARAMETER_SHOW, metricUtil.getCacheStatsNames());
+    }
+
+    public Map<Metric.Source, String> getAllMetricData() {
+        Map<Metric.Source, String> metrics = new HashMap<Metric.Source, String>();
+        metrics.put(Metric.Source.cache, getCacheStatisticsAsString());
+        metrics.put(Metric.Source.client, getClientStatisticsAsString());
+        metrics.put(Metric.Source.server, getServerStatisticsAsString());
+        metrics.put(Metric.Source.topologies, getTopologiesAsString());
+        return metrics;
     }
 
     public String getServerStatisticsAsString() {
@@ -59,6 +71,14 @@ public class MetricFetcher extends RestClientBase {
     public List<CacheStatistics> getCacheStatistics() {
         String url = buildUrl("/agents/cacheManagers/caches", requestParams);
         return restTemplate.getForObject(tmcUrl + url, List.class);
+    }
+
+    public List<Topologies> getTopologies() {
+        return restTemplate.getForObject(tmcUrl + "/agents/topologies/", List.class);
+    }
+
+    public String getTopologiesAsString() {
+        return restTemplate.getForObject(tmcUrl + "/agents/topologies/", String.class);
     }
 
     public String buildUrl(String baseUrl, Map params) {

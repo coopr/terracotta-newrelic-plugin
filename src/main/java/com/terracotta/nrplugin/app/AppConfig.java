@@ -22,8 +22,11 @@ import java.util.concurrent.Executors;
 @EnableAutoConfiguration
 @EnableAsync
 @EnableScheduling
-@ComponentScan(basePackages = {"com.terracotta"},
-        excludeFilters = @ComponentScan.Filter(pattern = {".*Mock.*"}, type = FilterType.REGEX))
+@ComponentScan(
+        basePackages = {"com.terracotta"},
+        excludeFilters = {
+                @ComponentScan.Filter(pattern = {".*Mock.*"}, type = FilterType.REGEX),
+                @ComponentScan.Filter(type = FilterType.ANNOTATION, value = Configuration.class)})
 @PropertySource("classpath:application.properties")
 public class AppConfig {
 

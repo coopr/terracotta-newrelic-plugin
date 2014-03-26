@@ -57,9 +57,12 @@ public class MetricUtil {
     public static final String METRIC_SIZE = "Size";
     public static final String METRIC_ENABLED = "Enabled";
 
+    // Topologies
+    public static final String METRIC_NUM_CONNECTED_CLIENTS = "NumConnectedClients";
+
     // NewRelic constants
 
-    public static final String NEW_RELIC_PATH_SEPARATOR = "\\/";
+    public static final String NEW_RELIC_PATH_SEPARATOR = "/";
     public static final String NEW_RELIC_MIN = "min";
     public static final String NEW_RELIC_MAX = "max";
     public static final String NEW_RELIC_TOTAL = "total";
@@ -138,6 +141,10 @@ public class MetricUtil {
                 toMetricPath(ehcacheClients, METRIC_SIZE), Metric.Source.cache, Metric.Unit.Bytes));
 //        metrics.add(new Metric("$.attributes." + METRIC_ENABLED,
 //                toMetricPath(ehcacheClients, METRIC_ENABLED), Metric.Source.cache, Metric.Unit.));
+
+        // Topologies metrics
+        metrics.add(new Metric("$.clientEntities", toMetricPath(ehcacheClients, METRIC_NUM_CONNECTED_CLIENTS),
+                Metric.Source.topologies, Metric.Unit.Count));
 
         // Populate cache stat names list
         for (Metric metric : metrics) {

@@ -7,11 +7,11 @@
     </appender>
 
     <logger name="com.terracotta.nrplugin">
-        <level value="debug"/>
+        <level value="info"/>
     </logger>
 
     <logger name="org.springframework.web">
-        <level value="debug"/>
+        <level value="info"/>
     </logger>
 
     <logger name="org.apache.http">

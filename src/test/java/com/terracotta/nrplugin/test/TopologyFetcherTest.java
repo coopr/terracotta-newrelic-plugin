@@ -2,7 +2,6 @@ package com.terracotta.nrplugin.test;
 
 import com.terracotta.nrplugin.app.RestConfig;
 import com.terracotta.nrplugin.pojo.tmc.Topologies;
-import com.terracotta.nrplugin.rest.tmc.TopologyFetcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -24,16 +23,16 @@ import java.util.List;
 @ContextConfiguration(classes = {RestConfig.class})
 public class TopologyFetcherTest {
 
-    final Logger log = LoggerFactory.getLogger(this.getClass());
-
-    @Autowired
-    TopologyFetcher topologyFetcher;
-
-    @Test
-    public void test() {
-        log.info("Getting topologies...");
-        List<Topologies> topologies = topologyFetcher.getTopologies();
-        log.info(topologies.toString());
-    }
+//    final Logger log = LoggerFactory.getLogger(this.getClass());
+//
+//    @Autowired
+//    TopologyFetcher topologyFetcher;
+//
+//    @Test
+//    public void test() {
+//        log.info("Getting topologies...");
+//        List<Topologies> topologies = topologyFetcher.getTopologies();
+//        log.info(topologies.toString());
+//    }
 
 }

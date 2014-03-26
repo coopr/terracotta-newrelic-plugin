@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -48,31 +49,13 @@ public class MetricCacher {
     @Scheduled(fixedDelay=30000, initialDelay = 500)
     public void cacheStats() {
         log.info("Starting to cache all stats...");
-        String serverJson = metricFetcher.getServerStatisticsAsString();
-        String clientJson = metricFetcher.getClientStatisticsAsString();
-        String cacheJson = metricFetcher.getCacheStatisticsAsString();
-
+        Map<Metric.Source, String> metricData = metricFetcher.getAllMetricData();
         for (Metric metric : metricUtil.getMetrics()) {
-            if (Metric.Source.server.equals(metric.getSource())) {
-                JSONArray servers  = JsonPath.read(serverJson, "$[*]");
-                for (Object server : servers) {
-                    JSONObject jsonObject = (JSONObject) server;
-                    putValue(metric, JsonPath.read(jsonObject, metric.getDataPath()));
-                }
-            }
-            else if (Metric.Source.client.equals(metric.getSource())) {
-                JSONArray clients  = JsonPath.read(clientJson, "$[*]");
-                for (Object client : clients) {
-                    JSONObject jsonObject = (JSONObject) client;
-                    putValue(metric, JsonPath.read(jsonObject, metric.getDataPath()));
-                }
-            }
-            else if (Metric.Source.cache.equals(metric.getSource())) {
-                JSONArray caches  = JsonPath.read(cacheJson, "$[*]");
-                for (Object cache : caches) {
-                    JSONObject jsonObject = (JSONObject) cache;
-                    putValue(metric, JsonPath.read(jsonObject, metric.getDataPath()));
-                }
+            String json = metricData.get(metric.getSource());
+            JSONArray objects = JsonPath.read(json, "$[*]");
+            for (Object o : objects) {
+                JSONObject jsonObject = (JSONObject) o;
+                putValue(metric, JsonPath.read(jsonObject, metric.getDataPath()));
             }
         }
         log.info("Done caching stats.");
@@ -85,6 +68,10 @@ public class MetricCacher {
         if (value instanceof Integer) metricDataset.addValue((Integer) value);
         else if (value instanceof Double) metricDataset.addValue((Double) value);
         else if (value instanceof Long) metricDataset.addValue((Long) value);
+        else if (value instanceof JSONArray) {
+            JSONArray jsonArray = (JSONArray) value;
+            metricDataset.addValue(jsonArray.size());
+        }
         else {
             log.warn("Class " + value.getClass() + " not numeric.");
         }
