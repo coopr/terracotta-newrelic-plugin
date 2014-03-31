@@ -1,9 +1,12 @@
 package com.terracotta.nrplugin.pojo;
 
+import com.terracotta.nrplugin.util.MetricUtil;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,7 +22,11 @@ public class MetricDataset implements Serializable {
 
     Metric metric;
     SynchronizedDescriptiveStatistics statistics;
-    long lastUpdate;
+    Type type = Type.absolute;
+//    String key;
+    Map<String, String> actualVarReplaceMap = new HashMap<String, String>();
+
+    public enum Type {absolute, diff}
 
     public MetricDataset() {
         statistics = new SynchronizedDescriptiveStatistics(WINDOW_SIZE_DEFAULT);
@@ -30,14 +37,38 @@ public class MetricDataset implements Serializable {
         statistics = new SynchronizedDescriptiveStatistics(windowSize);
     }
 
+    public MetricDataset(Metric metric, int windowSize, Type type) {
+        this.metric = metric;
+        this.type = type;
+        statistics = new SynchronizedDescriptiveStatistics(windowSize);
+    }
+
+    public MetricDataset(Metric metric, Type type, Map<String, String> actualVarReplaceMap) {
+        this.metric = metric;
+        this.type = type;
+        this.actualVarReplaceMap = actualVarReplaceMap;
+        statistics = new SynchronizedDescriptiveStatistics();
+    }
+
     public void addValue(double value) {
         statistics.addValue(value);
-        lastUpdate = System.currentTimeMillis();
+    }
+
+    public void putVarReplace(String key, String value) {
+        actualVarReplaceMap.put(key, value);
     }
 
     public String getKey() {
-        return metric.getReportedPath() + "[" + metric.getUnit() + "]";
+        String key = metric.getReportedPath() + MetricUtil.NEW_RELIC_PATH_SEPARATOR + type + "[" + metric.getUnit() + "]";
+        for (Map.Entry<String, String> entry : actualVarReplaceMap.entrySet()) {
+            key = key.replaceAll(entry.getKey(), entry.getValue());
+        }
+        return key;
     }
+
+//    public void setKey(String key) {
+//        this.key = key;
+//    }
 
     public Double getLastValue() {
         return statistics.getElement((int) statistics.getN() - 1);
@@ -51,15 +82,23 @@ public class MetricDataset implements Serializable {
         return statistics;
     }
 
-    public long getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(long lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
-
     public void setMetric(Metric metric) {
         this.metric = metric;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public Map<String, String> getActualVarReplaceMap() {
+        return actualVarReplaceMap;
+    }
+
+    public void setActualVarReplaceMap(Map<String, String> actualVarReplaceMap) {
+        this.actualVarReplaceMap = actualVarReplaceMap;
     }
 }

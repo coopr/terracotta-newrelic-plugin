@@ -8,9 +8,9 @@ Prerequisites
 
 1. A New Relic account. Signup for a free account at http://newrelic.com
 2. A configured Java Developer Kit (JDK) - version 1.6 or better
-3. The Ant build tool - version 1.8 or better
+3. Maven 3.x
 4. Git
-5. Terracotta product installed
+5. Access to a running Terracotta Management Console (TMC)
 	
 Building/Installing the Plugin Agent
 -----------------------------------------

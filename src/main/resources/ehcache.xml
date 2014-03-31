@@ -685,7 +685,7 @@ Here is an example of CacheManager level resource tuning, which will use up to 4
            timeToLiveSeconds="18000">
     </cache>
 
-    <cache name="datasetCache"
+    <cache name="diffsCache"
            maxEntriesLocalHeap="100000"
            timeToIdleSeconds="18000"
            timeToLiveSeconds="18000">

@@ -2,11 +2,14 @@ package com.terracotta.nrplugin.cache;
 
 import com.terracotta.nrplugin.pojo.Metric;
 import com.terracotta.nrplugin.pojo.MetricDataset;
+import com.terracotta.nrplugin.util.MetricUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,13 +21,16 @@ import java.util.Collections;
 @Service
 public class MockMetricProvider implements MetricProvider {
 
+    @Autowired
+    MetricUtil metricUtil;
+
     @Override
-    public Collection<MetricDataset> getAllMetrics() {
+    public Map<String, Object> getAllMetrics() {
         MetricDataset m1= new MetricDataset(new Metric("fakeDataPath", "Component/MockTerracotta",
                 Metric.Source.cache, Metric.Unit.Bytes), 1000 * 60);
         m1.addValue(100);
         m1.addValue(50);
         m1.addValue(300);
-        return Collections.singletonList(m1);
+        return metricUtil.metricsAsJson(Collections.singletonList(m1));
     }
 }

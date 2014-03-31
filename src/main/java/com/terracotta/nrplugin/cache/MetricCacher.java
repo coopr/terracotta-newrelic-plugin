@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
@@ -43,6 +44,11 @@ public class MetricCacher {
     @Value("#{cacheManager.getCache('statsCache')}")
     Cache statsCache;
 
+    @Value("#{cacheManager.getCache('diffsCache')}")
+    Cache diffsCache;
+
+    Map<String, MetricDataset> lastDataSet = new HashMap<String, MetricDataset>();
+
     @Value("${com.saggs.terracotta.nrplugin.data.windowSize}")
     int windowSize;
 
@@ -50,21 +56,24 @@ public class MetricCacher {
     public void cacheStats() {
         log.info("Starting to cache all stats...");
         Map<Metric.Source, String> metricData = metricFetcher.getAllMetricData();
+
         for (Metric metric : metricUtil.getMetrics()) {
             String json = metricData.get(metric.getSource());
             JSONArray objects = JsonPath.read(json, "$[*]");
             for (Object o : objects) {
-                JSONObject jsonObject = (JSONObject) o;
-                putValue(metric, JsonPath.read(jsonObject, metric.getDataPath()));
+                MetricDataset metricDataset = getMetricDataset(metric.getReportedPath());
+                if (metricDataset == null) metricDataset = new MetricDataset(metric, windowSize);
+                expandPathVariables(metricDataset, (JSONObject) o);
+                putValue(metricDataset, (JSONObject) o);
+                putDiff(lastDataSet.get(metricDataset.getKey()), metricDataset);
             }
+
         }
         log.info("Done caching stats.");
     }
 
-    private void putValue(Metric metric, Object value) {
-        MetricDataset metricDataset = getMetricDataset(metric.getReportedPath());
-        if (metricDataset == null) metricDataset = new MetricDataset(metric, windowSize);
-
+    private void putValue(MetricDataset metricDataset, JSONObject jsonObject) {
+        Object value = JsonPath.read(jsonObject, metricDataset.getMetric().getDataPath());
         if (value instanceof Integer) metricDataset.addValue((Integer) value);
         else if (value instanceof Double) metricDataset.addValue((Double) value);
         else if (value instanceof Long) metricDataset.addValue((Long) value);
@@ -85,7 +94,46 @@ public class MetricCacher {
     }
 
     public void putMetricDataset(MetricDataset metricDataset) {
+        log.debug("Putting " + metricDataset.getKey() + " to statsCache.");
         statsCache.put(new Element(metricDataset.getKey(), metricDataset));
+    }
+
+    private void expandPathVariables(MetricDataset metricDataset, JSONObject jsonObject) {
+        log.trace("Attempting to expand key " + metricDataset.getKey());
+        for (Map.Entry<String, String> entry : metricDataset.getMetric().getDataPathVariables().entrySet()) {
+            if (metricDataset.getActualVarReplaceMap().get(entry.getKey()) == null) {
+                metricDataset.putVarReplace(entry.getKey(), (String) JsonPath.read(jsonObject, entry.getValue()));
+            }
+        }
+    }
+
+    public Map<String, Number> getDiff(String key) {
+        Element element = diffsCache.get(key);
+        if (element != null) return (Map<String, Number>) element.getObjectValue();
+        else return null;
+    }
+
+    private void putDiff(MetricDataset previous, MetricDataset latest) {
+        if (previous == null) {
+            log.debug("No previously cached data for metric " + latest.getKey());
+        }
+        else {
+            Map<String, Number> diffs = new HashMap<String, Number>();
+            diffs.put(MetricUtil.NEW_RELIC_MIN, latest.getStatistics().getMin() - previous.getStatistics().getMin());
+            diffs.put(MetricUtil.NEW_RELIC_MAX, latest.getStatistics().getMax() - previous.getStatistics().getMax());
+            diffs.put(MetricUtil.NEW_RELIC_TOTAL, latest.getStatistics().getSum() - previous.getStatistics().getSum());
+            diffs.put(MetricUtil.NEW_RELIC_COUNT, latest.getStatistics().getN() - previous.getStatistics().getN());
+            diffs.put(MetricUtil.NEW_RELIC_SUM_OF_SQUARES, latest.getStatistics().getSumsq() - previous.getStatistics().getSumsq());
+
+            // Generate new key for diff rather than absolute
+            String newKey = new MetricDataset(latest.getMetric(), MetricDataset.Type.diff,
+                    latest.getActualVarReplaceMap()).getKey();
+            log.debug("Putting " + newKey);
+            diffsCache.put(new Element(newKey, diffs));
+        }
+
+        // Update lastDataSet after done
+        lastDataSet.put(latest.getKey(), latest);
     }
 
 }

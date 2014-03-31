@@ -2,6 +2,7 @@ package com.terracotta.nrplugin.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import com.terracotta.nrplugin.pojo.Metric;
 import com.terracotta.nrplugin.pojo.MetricDataset;
 import org.slf4j.Logger;
@@ -57,6 +58,11 @@ public class MetricUtil {
     public static final String METRIC_SIZE = "Size";
     public static final String METRIC_ENABLED = "Enabled";
 
+    public static final String CACHE_STATS_VARIABLE_CACHE_NAME_KEY = "%cacheName%";
+    public static final String CACHE_STATS_VARIABLE_CACHE_NAME_VALUE = "$.name";
+    public static final String CACHE_STATS_VARIABLE_CACHE_MANAGER_NAME_KEY = "%cacheManagerName%";
+    public static final String CACHE_STATS_VARIABLE_CACHE_MANAGER_NAME_VALUE = "$.cacheManagerName";
+
     // Topologies
     public static final String METRIC_NUM_CONNECTED_CLIENTS = "NumConnectedClients";
 
@@ -69,17 +75,21 @@ public class MetricUtil {
     public static final String NEW_RELIC_COUNT = "count";
     public static final String NEW_RELIC_SUM_OF_SQUARES = "sum_of_squares";
 
-    List<String> cacheStatsNames = new ArrayList<String>();
-    List<Metric> metrics = new ArrayList<Metric>();
-    ObjectMapper mapper = new ObjectMapper();
+    final List<String> cacheStatsNames = new ArrayList<String>();
+    final List<Metric> metrics = new ArrayList<Metric>();
+
+    // Base paths
+    String tc = toMetricPath("Component", "Terracotta");
+    final String servers = toMetricPath(tc, "Servers");
+    final String clients = toMetricPath(tc, "Clients");
+    final String ehcacheClients = toMetricPath(tc, "Ehcache", "Clients");
+    final Map<String, String> varReplaceMap = ImmutableMap.of(
+            CACHE_STATS_VARIABLE_CACHE_NAME_KEY, CACHE_STATS_VARIABLE_CACHE_NAME_VALUE,
+            CACHE_STATS_VARIABLE_CACHE_MANAGER_NAME_KEY, CACHE_STATS_VARIABLE_CACHE_MANAGER_NAME_VALUE
+    );    
 
     @PostConstruct
     private void init() {
-        String tc = toMetricPath("Component", "Terracotta");
-        String servers = toMetricPath(tc, "Servers");
-        String clients = toMetricPath(tc, "Clients");
-        String ehcacheClients = toMetricPath(tc, "Ehcache", "Clients");
-
         // Server metrics
         metrics.add(new Metric("$.statistics." + METRIC_LIVE_OBJECT_COUNT,
                 toMetricPath(servers, "Data", "Objects", METRIC_LIVE_OBJECT_COUNT), Metric.Source.server, Metric.Unit.Count));
@@ -99,48 +109,26 @@ public class MetricUtil {
                 toMetricPath(clients, METRIC_WRITE_RATE), Metric.Source.client, Metric.Unit.Rate));
 
         // Cache metrics
-        metrics.add(new Metric("$.attributes." + METRIC_EVICTED_COUNT,
-                toMetricPath(ehcacheClients, METRIC_EVICTED_COUNT), Metric.Source.cache, Metric.Unit.Count));
-        metrics.add(new Metric("$.attributes." + METRIC_EXPIRED_COUNT,
-                toMetricPath(ehcacheClients, METRIC_EXPIRED_COUNT), Metric.Source.cache, Metric.Unit.Count));
-        metrics.add(new Metric("$.attributes." + METRIC_CACHE_ON_DISK_HIT_RATE,
-                toMetricPath(ehcacheClients, METRIC_CACHE_ON_DISK_HIT_RATE), Metric.Source.cache, Metric.Unit.Rate));
-        metrics.add(new Metric("$.attributes." + METRIC_CACHE_IN_MEMORY_HIT_RATE,
-                toMetricPath(ehcacheClients, METRIC_CACHE_IN_MEMORY_HIT_RATE), Metric.Source.cache, Metric.Unit.Rate));
-        metrics.add(new Metric("$.attributes." + METRIC_CACHE_OFF_HEAP_HIT_RATE,
-                toMetricPath(ehcacheClients, METRIC_CACHE_OFF_HEAP_HIT_RATE), Metric.Source.cache, Metric.Unit.Rate));
-        metrics.add(new Metric("$.attributes." + METRIC_CACHE_HIT_RATE,
-                toMetricPath(ehcacheClients, METRIC_CACHE_HIT_RATE), Metric.Source.cache, Metric.Unit.Rate));
-        metrics.add(new Metric("$.attributes." + METRIC_ON_DISK_HIT_COUNT,
-                toMetricPath(ehcacheClients, METRIC_ON_DISK_HIT_COUNT), Metric.Source.cache, Metric.Unit.Count));
-        metrics.add(new Metric("$.attributes." + METRIC_IN_MEMORY_HIT_COUNT,
-                toMetricPath(ehcacheClients, METRIC_IN_MEMORY_HIT_COUNT), Metric.Source.cache, Metric.Unit.Count));
-        metrics.add(new Metric("$.attributes." + METRIC_OFF_HEAP_HIT_COUNT,
-                toMetricPath(ehcacheClients, METRIC_OFF_HEAP_HIT_COUNT), Metric.Source.cache, Metric.Unit.Count));
-        metrics.add(new Metric("$.attributes." + METRIC_CACHE_HIT_COUNT,
-                toMetricPath(ehcacheClients, METRIC_CACHE_HIT_COUNT), Metric.Source.cache, Metric.Unit.Count));
-        metrics.add(new Metric("$.attributes." + METRIC_ON_DISK_MISS_COUNT,
-                toMetricPath(ehcacheClients, METRIC_ON_DISK_MISS_COUNT), Metric.Source.cache, Metric.Unit.Count));
-        metrics.add(new Metric("$.attributes." + METRIC_IN_MEMORY_MISS_COUNT,
-                toMetricPath(ehcacheClients, METRIC_IN_MEMORY_MISS_COUNT), Metric.Source.cache, Metric.Unit.Count));
-        metrics.add(new Metric("$.attributes." + METRIC_OFF_HEAP_MISS_COUNT,
-                toMetricPath(ehcacheClients, METRIC_OFF_HEAP_MISS_COUNT), Metric.Source.cache, Metric.Unit.Count));
-        metrics.add(new Metric("$.attributes." + METRIC_CACHE_MISS_COUNT,
-                toMetricPath(ehcacheClients, METRIC_CACHE_MISS_COUNT), Metric.Source.cache, Metric.Unit.Count));
-        metrics.add(new Metric("$.attributes." + METRIC_PUT_COUNT,
-                toMetricPath(ehcacheClients, METRIC_PUT_COUNT), Metric.Source.cache, Metric.Unit.Count));
-        metrics.add(new Metric("$.attributes." + METRIC_REMOVED_COUNT,
-                toMetricPath(ehcacheClients, METRIC_REMOVED_COUNT), Metric.Source.cache, Metric.Unit.Count));
-        metrics.add(new Metric("$.attributes." + METRIC_ON_DISK_SIZE,
-                toMetricPath(ehcacheClients, METRIC_ON_DISK_SIZE), Metric.Source.cache, Metric.Unit.Bytes));
-        metrics.add(new Metric("$.attributes." + METRIC_IN_MEMORY_SIZE,
-                toMetricPath(ehcacheClients, METRIC_IN_MEMORY_SIZE), Metric.Source.cache, Metric.Unit.Bytes));
-        metrics.add(new Metric("$.attributes." + METRIC_OFF_HEAP_SIZE,
-                toMetricPath(ehcacheClients, METRIC_OFF_HEAP_SIZE), Metric.Source.cache, Metric.Unit.Bytes));
-        metrics.add(new Metric("$.attributes." + METRIC_SIZE,
-                toMetricPath(ehcacheClients, METRIC_SIZE), Metric.Source.cache, Metric.Unit.Bytes));
-//        metrics.add(new Metric("$.attributes." + METRIC_ENABLED,
-//                toMetricPath(ehcacheClients, METRIC_ENABLED), Metric.Source.cache, Metric.Unit.));
+        metrics.add(constructCacheMetric(METRIC_EVICTED_COUNT, Metric.Unit.Count));
+        metrics.add(constructCacheMetric(METRIC_EXPIRED_COUNT, Metric.Unit.Count));
+        metrics.add(constructCacheMetric(METRIC_CACHE_ON_DISK_HIT_RATE, Metric.Unit.Rate));
+        metrics.add(constructCacheMetric(METRIC_CACHE_IN_MEMORY_HIT_RATE, Metric.Unit.Rate));
+        metrics.add(constructCacheMetric(METRIC_CACHE_OFF_HEAP_HIT_RATE, Metric.Unit.Rate));
+        metrics.add(constructCacheMetric(METRIC_CACHE_HIT_RATE, Metric.Unit.Rate));
+        metrics.add(constructCacheMetric(METRIC_ON_DISK_HIT_COUNT, Metric.Unit.Count));
+        metrics.add(constructCacheMetric(METRIC_IN_MEMORY_HIT_COUNT, Metric.Unit.Count));
+        metrics.add(constructCacheMetric(METRIC_OFF_HEAP_HIT_COUNT, Metric.Unit.Count));
+        metrics.add(constructCacheMetric(METRIC_CACHE_HIT_COUNT, Metric.Unit.Count));
+        metrics.add(constructCacheMetric(METRIC_ON_DISK_MISS_COUNT, Metric.Unit.Count));
+        metrics.add(constructCacheMetric(METRIC_IN_MEMORY_MISS_COUNT, Metric.Unit.Count));
+        metrics.add(constructCacheMetric(METRIC_OFF_HEAP_MISS_COUNT, Metric.Unit.Count));
+        metrics.add(constructCacheMetric(METRIC_CACHE_MISS_COUNT, Metric.Unit.Count));
+        metrics.add(constructCacheMetric(METRIC_PUT_COUNT, Metric.Unit.Count));
+        metrics.add(constructCacheMetric(METRIC_REMOVED_COUNT, Metric.Unit.Count));
+        metrics.add(constructCacheMetric(METRIC_ON_DISK_SIZE, Metric.Unit.Count));
+        metrics.add(constructCacheMetric(METRIC_IN_MEMORY_SIZE, Metric.Unit.Count));
+        metrics.add(constructCacheMetric(METRIC_OFF_HEAP_SIZE, Metric.Unit.Count));
+        metrics.add(constructCacheMetric(METRIC_SIZE, Metric.Unit.Count));
 
         // Topologies metrics
         metrics.add(new Metric("$.clientEntities", toMetricPath(ehcacheClients, METRIC_NUM_CONNECTED_CLIENTS),
@@ -154,12 +142,14 @@ public class MetricUtil {
         }
     }
 
-    public List<Metric> getMetrics() {
-        return metrics;
+    private Metric constructCacheMetric(String attribute, Metric.Unit unit) {
+        return new Metric("$.attributes." + attribute, toMetricPath(ehcacheClients,
+                CACHE_STATS_VARIABLE_CACHE_MANAGER_NAME_KEY, CACHE_STATS_VARIABLE_CACHE_NAME_KEY, attribute),
+                varReplaceMap, Metric.Source.cache, unit);
     }
 
-    public void setMetrics(List<Metric> metrics) {
-        this.metrics = metrics;
+    public List<Metric> getMetrics() {
+        return metrics;
     }
 
     public List<String> getCacheStatsNames() {
@@ -171,6 +161,7 @@ public class MetricUtil {
         for (MetricDataset metricDataset : metrics) {
             try {
                 Map.Entry<String, Map<String, Number>> entry = metricAsJson(metricDataset);
+                log.trace("Deserializing " + entry.getKey());
                 map.put(entry.getKey(), entry.getValue());
             } catch (Exception e) {
                 log.error("Error marshalling metric to JSON.", e);
@@ -189,6 +180,7 @@ public class MetricUtil {
         values.put(NEW_RELIC_COUNT, metricDataset.getStatistics().getN());
         values.put(NEW_RELIC_SUM_OF_SQUARES, metricDataset.getStatistics().getSumsq());
 //        metric.put(metricDataset.getKey(), values);
+
         return new AbstractMap.SimpleEntry<String, Map<String, Number>>(metricDataset.getKey(), values);
 //        return mapper.writeValueAsString(metric);
     }

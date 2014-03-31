@@ -1,5 +1,7 @@
 package com.terracotta.nrplugin.rest.nr;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.terracotta.nrplugin.cache.MetricProvider;
 import com.terracotta.nrplugin.pojo.nr.Agent;
 import com.terracotta.nrplugin.pojo.nr.Component;
@@ -86,13 +88,20 @@ public class MetricReporter extends RestClientBase {
         }
     }
 
-    @Scheduled(fixedDelay=30000, initialDelay = 15000)
+    @Scheduled(fixedDelay=30000, initialDelay = 5000)
     public void reportMetrics() {
         NewRelicPayload newRelicPayload = new NewRelicPayload(
                 new Agent(hostname, pid, version),
                 Collections.singletonList(
-                        new Component(name, guid, 30, metricUtil.metricsAsJson(metricProvider.getAllMetrics()))));
+                        new Component(name, guid, 30, metricProvider.getAllMetrics())));
         log.info("Attempting to report stats to NewRelic...");
+        if (log.isDebugEnabled()) {
+            try {
+                log.debug("Payload: " + new ObjectMapper().writeValueAsString(newRelicPayload));
+            } catch (JsonProcessingException e) {
+                log.error("Error serializing payload.", e);
+            }
+        }
 
         HttpHeaders requestHeaders = new HttpHeaders();
         requestHeaders.set(X_LICENSE_KEY, licenseKey);

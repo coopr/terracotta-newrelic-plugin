@@ -1,16 +1,16 @@
 package com.terracotta.nrplugin.cache;
 
 import com.terracotta.nrplugin.pojo.MetricDataset;
+import com.terracotta.nrplugin.util.MetricUtil;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,17 +27,41 @@ public class DefaultMetricProvider implements MetricProvider {
     @Value("#{cacheManager.getCache('statsCache')}")
     Cache statsCache;
 
+    @Value("#{cacheManager.getCache('diffsCache')}")
+    Cache diffsCache;
+
+    @Autowired
+    MetricUtil metricUtil;
+
     @Override
-    public Collection<MetricDataset> getAllMetrics() {
+    public Map<String, Object> getAllMetrics() {
         log.debug("Gathering stats from cache...");
-        Set<MetricDataset> metrics = new HashSet<MetricDataset>();
+        Map<String, Object> metrics = new HashMap<String, Object>();
+        List<MetricDataset> datasets = new ArrayList<MetricDataset>();
+
+        // Get absolute metrics
         for (Object key : statsCache.getKeys()) {
+//            log.debug("Adding " + key);
             Element element = statsCache.get((key));
             if (element != null && element.getObjectValue() instanceof MetricDataset) {
-                metrics.add((MetricDataset) element.getObjectValue());
+                MetricDataset metricDataset = (MetricDataset) element.getObjectValue();
+//                log.debug("Adding " + metricDataset.getKey());
+//                log.info(key + "=?" + metricDataset.getKey());
+                datasets.add(metricDataset);
             }
         }
+        metrics.putAll(metricUtil.metricsAsJson(datasets));
+
+        // Get diff metrics
+        for (Object key : diffsCache.getKeys()) {
+            Element element = diffsCache.get((key));
+            if (element != null && element.getObjectValue() instanceof Map) {
+                metrics.put((String) element.getObjectKey(), element.getObjectValue());
+            }
+        }
+
         log.info("Returning " + metrics.size() + " metric(s) from cache.");
         return metrics;
     }
+
 }

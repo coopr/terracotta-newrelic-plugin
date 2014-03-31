@@ -3,6 +3,8 @@ package com.terracotta.nrplugin.pojo;
 import com.terracotta.nrplugin.util.MetricUtil;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,6 +19,7 @@ public class Metric implements Serializable {
 
     String reportedPath;
     String dataPath;
+    Map<String, String> dataPathVariables = new HashMap<String, String>();
     Source source;
     Unit unit;
 
@@ -32,9 +35,23 @@ public class Metric implements Serializable {
         this.unit = unit;
     }
 
+    public Metric(String dataPath, String reportedPath, Map<String, String> dataPathVariables, Source source, Unit unit) {
+        if (reportedPath == null) throw new IllegalArgumentException("reportedPath cannot be null.");
+        if (dataPath == null) throw new IllegalArgumentException("dataPath cannot be null.");
+        this.dataPath = dataPath;
+        this.reportedPath = reportedPath;
+        this.dataPathVariables = dataPathVariables;
+        this.source = source;
+        this.unit = unit;
+    }
+
     public String getName() {
         String[] split = reportedPath.split(MetricUtil.NEW_RELIC_PATH_SEPARATOR);
         return split.length > 0 ? split[split.length - 1] : null;
+    }
+
+    public boolean hasDynamicPath() {
+        return dataPathVariables.size() > 0;
     }
 
     public String getDataPath() {
@@ -67,6 +84,14 @@ public class Metric implements Serializable {
 
     public void setUnit(Unit unit) {
         this.unit = unit;
+    }
+
+    public Map<String, String> getDataPathVariables() {
+        return dataPathVariables;
+    }
+
+    public void setDataPathVariables(Map<String, String> dataPathVariables) {
+        this.dataPathVariables = dataPathVariables;
     }
 
     public static enum Source {server, client, cache, topologies}

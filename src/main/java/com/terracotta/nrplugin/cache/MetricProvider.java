@@ -3,6 +3,7 @@ package com.terracotta.nrplugin.cache;
 import com.terracotta.nrplugin.pojo.MetricDataset;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,6 +14,6 @@ import java.util.Collection;
  */
 public interface MetricProvider {
 
-    public Collection<MetricDataset> getAllMetrics();
+    public Map<String, Object> getAllMetrics();
 
 }
