@@ -1,7 +1,5 @@
 @echo off
 
-rem All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
-
 setlocal
 
 if not defined JAVA_HOME (
@@ -11,10 +9,11 @@ if not defined JAVA_HOME (
 
 set JAVA_HOME=%JAVA_HOME:"=%
 set JAVA_COMMAND="%JAVA_HOME%\bin\java"
-set JAVA_OPTS=-Xms128m -Xmx512m -Djavax.net.ssl.trustStore=geotrust.jks -Djavax.net.ssl.trustStorePassword=password
+set JAVA_OPTS=-Xms128m -Xmx512m -Djavax.net.ssl.trustStore=conf/geotrust.jks -Djavax.net.ssl.trustStorePassword=password
 
-:START_TCSERVER
-%JAVA_COMMAND% %JAVA_OPTS% -jar tc-nr-plugin-###com.terracotta.nrplugin.version###.jar
+%JAVA_COMMAND% %JAVA_OPTS% -Djava.library.path=bin -cp "lib\*;conf" com.terracotta.nrplugin.app.Main 
+
+pause
 
 exit \b %ERRORLEVEL%
 endlocal

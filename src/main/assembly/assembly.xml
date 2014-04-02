@@ -31,20 +31,23 @@
             <includes>
                 <include>geotrust.jks</include>
             </includes>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>/conf</outputDirectory>
             <directory>${basedir}/src/main/assembly</directory>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>/bin</outputDirectory>
+            <directory>${basedir}/src/main/sigar</directory>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>/conf</outputDirectory>
+            <directory>${basedir}/src/main/conf</directory>
         </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>/lib</outputDirectory>
             <useProjectArtifact>true</useProjectArtifact>
-            <includes>
-                <include>com.terracotta:*</include>
-            </includes>
-            <!--<useTransitiveDependencies>false</useTransitiveDependencies>-->
-            <!--<unpack>true</unpack>-->
-            <!--<scope>runtime</scope>-->
+            <useTransitiveDependencies>true</useTransitiveDependencies>
         </dependencySet>
     </dependencySets>
 

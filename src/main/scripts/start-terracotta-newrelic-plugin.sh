@@ -17,15 +17,8 @@ echo "$0: the JAVA_HOME environment variable is not defined correctly"
 exit 2
 fi
 
-JAVA_OPTS="${JAVA_OPTS} -Xms128m -Xmx512m -Djavax.net.ssl.trustStore=geotrust.jks -Djavax.net.ssl.trustStorePassword=password
-
-# For Cygwin, convert paths to Windows before invoking java
-if $cygwin; then
-[ -n "$PLUGIN_DIR" ] && PLUGIN_DIR=`cygpath -d "$PLUGIN_DIR"`
-fi
-
-echo ${CLASSPATH}
+JAVA_OPTS="${JAVA_OPTS} -Xms128m -Xmx512m -Djavax.net.ssl.trustStore=conf/geotrust.jks -Djavax.net.ssl.trustStorePassword=password
 
 exec "${JAVA_HOME}/bin/java" \
 ${JAVA_OPTS} \
--jar tc-nr-plugin-###com.terracotta.nrplugin.version###.jar "$@"
+-Djava.library.path=bin -cp "lib/*:conf" com.terracotta.nrplugin.app.Main "$@"
