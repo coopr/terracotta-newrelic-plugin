@@ -1,7 +1,6 @@
 package com.terracotta.nrplugin.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.terracotta.nrplugin.pojo.Metric;
 import com.terracotta.nrplugin.pojo.MetricDataset;
@@ -82,7 +81,7 @@ public class MetricUtil {
     String tc = toMetricPath("Component", "Terracotta");
     final String servers = toMetricPath(tc, "Servers");
     final String clients = toMetricPath(tc, "Clients");
-    final String ehcacheClients = toMetricPath(tc, "Ehcache", "Clients");
+    final String ehcache = toMetricPath(tc, "Ehcache");
     final Map<String, String> varReplaceMap = ImmutableMap.of(
             CACHE_STATS_VARIABLE_CACHE_NAME_KEY, CACHE_STATS_VARIABLE_CACHE_NAME_VALUE,
             CACHE_STATS_VARIABLE_CACHE_MANAGER_NAME_KEY, CACHE_STATS_VARIABLE_CACHE_MANAGER_NAME_VALUE
@@ -94,13 +93,13 @@ public class MetricUtil {
         metrics.add(new Metric("$.statistics." + METRIC_LIVE_OBJECT_COUNT,
                 toMetricPath(servers, "Data", "Objects", METRIC_LIVE_OBJECT_COUNT), Metric.Source.server, Metric.Unit.Count));
         metrics.add(new Metric("$.statistics.StorageStats.DATA." + METRIC_USED,
-                toMetricPath(servers, "Data", "Objects", METRIC_USED), Metric.Source.server, Metric.Unit.Bytes));
+                toMetricPath(servers, "OnHeap", "Bytes", METRIC_USED), Metric.Source.server, Metric.Unit.Bytes));
         metrics.add(new Metric("$.statistics.StorageStats.DATA." + METRIC_MAX,
-                toMetricPath(servers, "Data", "Objects", METRIC_MAX), Metric.Source.server, Metric.Unit.Bytes));
+                toMetricPath(servers, "OnHeap", "Bytes", METRIC_MAX), Metric.Source.server, Metric.Unit.Bytes));
         metrics.add(new Metric("$.statistics.StorageStats.OFFHEAP." + METRIC_USED,
-                toMetricPath(servers, "Data", "Objects", METRIC_USED), Metric.Source.server, Metric.Unit.Bytes));
+                toMetricPath(servers, "OffHeap", "Bytes", METRIC_USED), Metric.Source.server, Metric.Unit.Bytes));
         metrics.add(new Metric("$.statistics.StorageStats.OFFHEAP." + METRIC_MAX,
-                toMetricPath(servers, "Data", "Objects", METRIC_MAX), Metric.Source.server, Metric.Unit.Bytes));
+                toMetricPath(servers, "OffHeap", "Bytes", METRIC_MAX), Metric.Source.server, Metric.Unit.Bytes));
 
         // Client metrics
         metrics.add(new Metric("$.statistics." + METRIC_READ_RATE,
@@ -131,7 +130,7 @@ public class MetricUtil {
         metrics.add(constructCacheMetric(METRIC_SIZE, Metric.Unit.Count));
 
         // Topologies metrics
-        metrics.add(new Metric("$.clientEntities", toMetricPath(ehcacheClients, METRIC_NUM_CONNECTED_CLIENTS),
+        metrics.add(new Metric("$.clientEntities", toMetricPath(clients, METRIC_NUM_CONNECTED_CLIENTS),
                 Metric.Source.topologies, Metric.Unit.Count));
 
         // Populate cache stat names list
@@ -143,7 +142,7 @@ public class MetricUtil {
     }
 
     private Metric constructCacheMetric(String attribute, Metric.Unit unit) {
-        return new Metric("$.attributes." + attribute, toMetricPath(ehcacheClients,
+        return new Metric("$.attributes." + attribute, toMetricPath(ehcache,
                 CACHE_STATS_VARIABLE_CACHE_MANAGER_NAME_KEY, CACHE_STATS_VARIABLE_CACHE_NAME_KEY, attribute),
                 varReplaceMap, Metric.Source.cache, unit);
     }
@@ -172,17 +171,13 @@ public class MetricUtil {
 
     public Map.Entry<String, Map<String, Number>> metricAsJson(MetricDataset metricDataset)
             throws JsonProcessingException {
-//        Map<String, Map<String, Number>> metric = new HashMap<String, Map<String, Number>>();
         Map<String, Number> values = new HashMap<String, Number>();
         values.put(NEW_RELIC_MIN, metricDataset.getStatistics().getMin());
         values.put(NEW_RELIC_MAX, metricDataset.getStatistics().getMax());
         values.put(NEW_RELIC_TOTAL, metricDataset.getStatistics().getSum());
         values.put(NEW_RELIC_COUNT, metricDataset.getStatistics().getN());
         values.put(NEW_RELIC_SUM_OF_SQUARES, metricDataset.getStatistics().getSumsq());
-//        metric.put(metricDataset.getKey(), values);
-
         return new AbstractMap.SimpleEntry<String, Map<String, Number>>(metricDataset.getKey(), values);
-//        return mapper.writeValueAsString(metric);
     }
 
     public String toMetricPath(String... values) {

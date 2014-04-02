@@ -110,6 +110,7 @@ public class MetricReporter extends RestClientBase {
         HttpEntity<NewRelicPayload> requestEntity = new HttpEntity<NewRelicPayload>(newRelicPayload, requestHeaders);
         HttpEntity<String> response = restTemplate.exchange(nrUrl, HttpMethod.POST, requestEntity, String.class);
         log.debug("Received response: " + response);
+        log.info("Done reporting to NewRelic.");
     }
 
 }

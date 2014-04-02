@@ -23,7 +23,6 @@ public class MetricDataset implements Serializable {
     Metric metric;
     SynchronizedDescriptiveStatistics statistics;
     Type type = Type.absolute;
-//    String key;
     Map<String, String> actualVarReplaceMap = new HashMap<String, String>();
 
     public enum Type {absolute, diff}
@@ -59,16 +58,13 @@ public class MetricDataset implements Serializable {
     }
 
     public String getKey() {
-        String key = metric.getReportedPath() + MetricUtil.NEW_RELIC_PATH_SEPARATOR + type + "[" + metric.getUnit() + "]";
+        String key = metric.getBaseReportedPath() + MetricUtil.NEW_RELIC_PATH_SEPARATOR + type +
+                MetricUtil.NEW_RELIC_PATH_SEPARATOR + metric.getName() + "[" + metric.getUnit() + "]";
         for (Map.Entry<String, String> entry : actualVarReplaceMap.entrySet()) {
             key = key.replaceAll(entry.getKey(), entry.getValue());
         }
         return key;
     }
-
-//    public void setKey(String key) {
-//        this.key = key;
-//    }
 
     public Double getLastValue() {
         return statistics.getElement((int) statistics.getN() - 1);

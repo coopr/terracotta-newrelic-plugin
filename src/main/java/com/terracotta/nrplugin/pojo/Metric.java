@@ -1,9 +1,12 @@
 package com.terracotta.nrplugin.pojo;
 
 import com.terracotta.nrplugin.util.MetricUtil;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,6 +51,13 @@ public class Metric implements Serializable {
     public String getName() {
         String[] split = reportedPath.split(MetricUtil.NEW_RELIC_PATH_SEPARATOR);
         return split.length > 0 ? split[split.length - 1] : null;
+    }
+
+    public String getBaseReportedPath() {
+//        List<String> split = Arrays.asList(reportedPath.split(MetricUtil.NEW_RELIC_PATH_SEPARATOR));
+        String[] split = reportedPath.split(MetricUtil.NEW_RELIC_PATH_SEPARATOR);
+        String[] spliced = Arrays.copyOf(split, split.length - 1);
+        return StringUtils.join(spliced, MetricUtil.NEW_RELIC_PATH_SEPARATOR);
     }
 
     public boolean hasDynamicPath() {

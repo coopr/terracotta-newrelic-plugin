@@ -94,7 +94,7 @@ public class MetricCacher {
     }
 
     public void putMetricDataset(MetricDataset metricDataset) {
-        log.debug("Putting " + metricDataset.getKey() + " to statsCache.");
+        log.trace("Putting " + metricDataset.getKey() + " to statsCache.");
         statsCache.put(new Element(metricDataset.getKey(), metricDataset));
     }
 
@@ -128,7 +128,7 @@ public class MetricCacher {
             // Generate new key for diff rather than absolute
             String newKey = new MetricDataset(latest.getMetric(), MetricDataset.Type.diff,
                     latest.getActualVarReplaceMap()).getKey();
-            log.debug("Putting " + newKey);
+            log.trace("Putting " + newKey);
             diffsCache.put(new Element(newKey, diffs));
         }
 

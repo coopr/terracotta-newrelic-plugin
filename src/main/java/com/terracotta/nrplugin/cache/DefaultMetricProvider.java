@@ -41,12 +41,9 @@ public class DefaultMetricProvider implements MetricProvider {
 
         // Get absolute metrics
         for (Object key : statsCache.getKeys()) {
-//            log.debug("Adding " + key);
             Element element = statsCache.get((key));
             if (element != null && element.getObjectValue() instanceof MetricDataset) {
                 MetricDataset metricDataset = (MetricDataset) element.getObjectValue();
-//                log.debug("Adding " + metricDataset.getKey());
-//                log.info(key + "=?" + metricDataset.getKey());
                 datasets.add(metricDataset);
             }
         }
