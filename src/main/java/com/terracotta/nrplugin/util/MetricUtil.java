@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableMap;
 import com.terracotta.nrplugin.pojo.Metric;
 import com.terracotta.nrplugin.pojo.MetricDataset;
+import com.terracotta.nrplugin.pojo.RatioMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -56,6 +57,16 @@ public class MetricUtil {
     public static final String METRIC_OFF_HEAP_SIZE = "OffHeapSize";
     public static final String METRIC_SIZE = "Size";
     public static final String METRIC_ENABLED = "Enabled";
+
+    // Cache ratio metrics
+    public static final String METRIC_CACHE_HIT_RATIO = "CacheHitRatio";
+    public static final String METRIC_ON_DISK_HIT_RATIO = "OnDiskHitRatio";
+    public static final String METRIC_IN_MEMORY_HIT_RATIO = "InMemoryHitRatio";
+    public static final String METRIC_OFF_HEAP_HIT_RATIO = "OffHeapHitRatio";
+    public static final String METRIC_CACHE_MISS_RATIO = "CacheMissRatio";
+    public static final String METRIC_ON_DISK_MISS_RATIO = "OnDiskMissRatio";
+    public static final String METRIC_IN_MEMORY_MISS_RATIO = "InMemoryMissRatio";
+    public static final String METRIC_OFF_HEAP_MISS_RATIO = "OffHeapMissRatio";
 
     public static final String CACHE_STATS_VARIABLE_CACHE_NAME_KEY = "%cacheName%";
     public static final String CACHE_STATS_VARIABLE_CACHE_NAME_VALUE = "$.name";
@@ -114,20 +125,36 @@ public class MetricUtil {
         metrics.add(constructCacheMetric(METRIC_CACHE_IN_MEMORY_HIT_RATE, Metric.Unit.Rate));
         metrics.add(constructCacheMetric(METRIC_CACHE_OFF_HEAP_HIT_RATE, Metric.Unit.Rate));
         metrics.add(constructCacheMetric(METRIC_CACHE_HIT_RATE, Metric.Unit.Rate));
-        metrics.add(constructCacheMetric(METRIC_ON_DISK_HIT_COUNT, Metric.Unit.Count));
-        metrics.add(constructCacheMetric(METRIC_IN_MEMORY_HIT_COUNT, Metric.Unit.Count));
-        metrics.add(constructCacheMetric(METRIC_OFF_HEAP_HIT_COUNT, Metric.Unit.Count));
-        metrics.add(constructCacheMetric(METRIC_CACHE_HIT_COUNT, Metric.Unit.Count));
-        metrics.add(constructCacheMetric(METRIC_ON_DISK_MISS_COUNT, Metric.Unit.Count));
-        metrics.add(constructCacheMetric(METRIC_IN_MEMORY_MISS_COUNT, Metric.Unit.Count));
-        metrics.add(constructCacheMetric(METRIC_OFF_HEAP_MISS_COUNT, Metric.Unit.Count));
-        metrics.add(constructCacheMetric(METRIC_CACHE_MISS_COUNT, Metric.Unit.Count));
+        metrics.add(constructCacheMetric(METRIC_CACHE_HIT_COUNT, Metric.Unit.Count, Metric.RatioType.hit));
+        metrics.add(constructCacheMetric(METRIC_ON_DISK_HIT_COUNT, Metric.Unit.Count, Metric.RatioType.hit));
+        metrics.add(constructCacheMetric(METRIC_IN_MEMORY_HIT_COUNT, Metric.Unit.Count, Metric.RatioType.hit));
+        metrics.add(constructCacheMetric(METRIC_OFF_HEAP_HIT_COUNT, Metric.Unit.Count, Metric.RatioType.hit));
+        metrics.add(constructCacheMetric(METRIC_ON_DISK_MISS_COUNT, Metric.Unit.Count, Metric.RatioType.miss));
+        metrics.add(constructCacheMetric(METRIC_IN_MEMORY_MISS_COUNT, Metric.Unit.Count, Metric.RatioType.miss));
+        metrics.add(constructCacheMetric(METRIC_OFF_HEAP_MISS_COUNT, Metric.Unit.Count, Metric.RatioType.miss));
+        metrics.add(constructCacheMetric(METRIC_CACHE_MISS_COUNT, Metric.Unit.Count, Metric.RatioType.miss));
         metrics.add(constructCacheMetric(METRIC_PUT_COUNT, Metric.Unit.Count));
         metrics.add(constructCacheMetric(METRIC_REMOVED_COUNT, Metric.Unit.Count));
         metrics.add(constructCacheMetric(METRIC_ON_DISK_SIZE, Metric.Unit.Count));
         metrics.add(constructCacheMetric(METRIC_IN_MEMORY_SIZE, Metric.Unit.Count));
         metrics.add(constructCacheMetric(METRIC_OFF_HEAP_SIZE, Metric.Unit.Count));
         metrics.add(constructCacheMetric(METRIC_SIZE, Metric.Unit.Count));
+        
+        // Cache Ratio metrics
+        RatioMetric cacheHitRatio = constructRatioMetric(METRIC_CACHE_HIT_RATIO, null, METRIC_CACHE_HIT_COUNT, METRIC_CACHE_MISS_COUNT);
+        RatioMetric onDiskHitRatio = constructRatioMetric(METRIC_ON_DISK_HIT_RATIO, null, METRIC_ON_DISK_HIT_COUNT, METRIC_ON_DISK_MISS_COUNT);
+        RatioMetric inMemoryHitRatio = constructRatioMetric(METRIC_IN_MEMORY_HIT_RATIO, null, METRIC_IN_MEMORY_HIT_COUNT, METRIC_IN_MEMORY_MISS_COUNT);
+        RatioMetric offHeapHitRatio = constructRatioMetric(METRIC_OFF_HEAP_HIT_RATIO, null, METRIC_OFF_HEAP_HIT_COUNT, METRIC_OFF_HEAP_MISS_COUNT);
+        RatioMetric cacheMissRatio = constructRatioMetric(METRIC_CACHE_MISS_RATIO, cacheHitRatio, METRIC_CACHE_MISS_COUNT, METRIC_CACHE_HIT_COUNT);
+        RatioMetric onDiskMissRatio = constructRatioMetric(METRIC_ON_DISK_MISS_RATIO, onDiskHitRatio, METRIC_ON_DISK_MISS_COUNT, METRIC_ON_DISK_HIT_COUNT);
+        RatioMetric inMemoryMissRatio = constructRatioMetric(METRIC_IN_MEMORY_MISS_RATIO, inMemoryHitRatio, METRIC_IN_MEMORY_MISS_COUNT, METRIC_IN_MEMORY_HIT_COUNT);
+        RatioMetric offHeapMissRatio = constructRatioMetric(METRIC_OFF_HEAP_MISS_RATIO, offHeapHitRatio, METRIC_OFF_HEAP_MISS_COUNT, METRIC_OFF_HEAP_HIT_COUNT);
+        cacheHitRatio.setPair(cacheMissRatio);
+        onDiskHitRatio.setPair(onDiskMissRatio);
+        inMemoryHitRatio.setPair(inMemoryMissRatio);
+        offHeapHitRatio.setPair(offHeapMissRatio);
+        metrics.addAll(Arrays.asList(cacheHitRatio, onDiskHitRatio, inMemoryHitRatio, offHeapHitRatio,
+                cacheMissRatio, onDiskMissRatio, inMemoryMissRatio, offHeapMissRatio));
 
         // Topologies metrics
         metrics.add(new Metric("$.clientEntities", toMetricPath(clients, METRIC_NUM_CONNECTED_CLIENTS),
@@ -142,13 +169,45 @@ public class MetricUtil {
     }
 
     private Metric constructCacheMetric(String attribute, Metric.Unit unit) {
+        return constructCacheMetric(attribute, unit, null);
+    }
+
+    private Metric constructCacheMetric(String attribute, Metric.Unit unit, Metric.RatioType ratioType) {
         return new Metric("$.attributes." + attribute, toMetricPath(ehcache,
                 CACHE_STATS_VARIABLE_CACHE_MANAGER_NAME_KEY, CACHE_STATS_VARIABLE_CACHE_NAME_KEY, attribute),
-                varReplaceMap, Metric.Source.cache, unit);
+                varReplaceMap, Metric.Source.cache, unit, ratioType);
+    }
+
+    private RatioMetric constructRatioMetric(String attribute, RatioMetric pair, String numeratorCount,
+                                             String denominatorCount) {
+        return new RatioMetric(toMetricPath(ehcache, CACHE_STATS_VARIABLE_CACHE_MANAGER_NAME_KEY,
+                        CACHE_STATS_VARIABLE_CACHE_NAME_KEY, attribute), varReplaceMap,
+                Metric.Source.cache, Metric.Unit.CountSecond, pair, numeratorCount, denominatorCount);
     }
 
     public List<Metric> getMetrics() {
         return metrics;
+    }
+
+    public List<Metric> getRatioMetrics() {
+        return doFilterMetrics(true);
+    }
+
+    public List<Metric> getNonRatioMetrics() {
+        return doFilterMetrics(false);
+    }
+
+    private List<Metric> doFilterMetrics(boolean ratioFlag) {
+        List<Metric> includedMetrics = new ArrayList<Metric>();
+        for (Metric metric : metrics) {
+            if (ratioFlag && metric instanceof RatioMetric) {
+                includedMetrics.add(metric);
+            }
+            if (!ratioFlag && !(metric instanceof RatioMetric)) {
+                includedMetrics.add(metric);
+            }
+        }
+        return includedMetrics;
     }
 
     public List<String> getCacheStatsNames() {

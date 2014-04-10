@@ -25,27 +25,26 @@ public class Metric implements Serializable {
     Map<String, String> dataPathVariables = new HashMap<String, String>();
     Source source;
     Unit unit;
+    RatioType ratioType;
 
     public Metric() {
     }
 
     public Metric(String dataPath, String reportedPath, Source source, Unit unit) {
+        this();
         if (reportedPath == null) throw new IllegalArgumentException("reportedPath cannot be null.");
-        if (dataPath == null) throw new IllegalArgumentException("dataPath cannot be null.");
+//        if (dataPath == null) throw new IllegalArgumentException("dataPath cannot be null.");
         this.dataPath = dataPath;
         this.reportedPath = reportedPath;
         this.source = source;
         this.unit = unit;
     }
 
-    public Metric(String dataPath, String reportedPath, Map<String, String> dataPathVariables, Source source, Unit unit) {
-        if (reportedPath == null) throw new IllegalArgumentException("reportedPath cannot be null.");
-        if (dataPath == null) throw new IllegalArgumentException("dataPath cannot be null.");
-        this.dataPath = dataPath;
-        this.reportedPath = reportedPath;
+    public Metric(String dataPath, String reportedPath, Map<String, String> dataPathVariables, Source source,
+                  Unit unit, RatioType ratioType) {
+        this(dataPath, reportedPath, source, unit);
         this.dataPathVariables = dataPathVariables;
-        this.source = source;
-        this.unit = unit;
+        this.ratioType = ratioType;
     }
 
     public String getName() {
@@ -103,6 +102,17 @@ public class Metric implements Serializable {
     public void setDataPathVariables(Map<String, String> dataPathVariables) {
         this.dataPathVariables = dataPathVariables;
     }
+
+    public RatioType getRatioType() {
+        if (ratioType == null) ratioType = RatioType.neither;
+        return ratioType;
+    }
+
+    public void setRatioType(RatioType ratioType) {
+        this.ratioType = ratioType;
+    }
+
+    public static enum RatioType {hit, miss, neither}
 
     public static enum Source {server, client, cache, topologies}
 

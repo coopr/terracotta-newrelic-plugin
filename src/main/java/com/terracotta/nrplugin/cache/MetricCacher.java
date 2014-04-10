@@ -3,6 +3,7 @@ package com.terracotta.nrplugin.cache;
 import com.jayway.jsonpath.JsonPath;
 import com.terracotta.nrplugin.pojo.Metric;
 import com.terracotta.nrplugin.pojo.MetricDataset;
+import com.terracotta.nrplugin.pojo.RatioMetric;
 import com.terracotta.nrplugin.rest.tmc.MetricFetcher;
 import com.terracotta.nrplugin.util.MetricUtil;
 import net.minidev.json.JSONArray;
@@ -56,41 +57,90 @@ public class MetricCacher {
     public void cacheStats() {
         log.info("Starting to cache all stats...");
         Map<Metric.Source, String> metricData = metricFetcher.getAllMetricData();
+        Map<Metric.Source, JSONArray> jsonObjects = toJsonArray(metricData);
 
-        for (Metric metric : metricUtil.getMetrics()) {
-            String json = metricData.get(metric.getSource());
-            JSONArray objects = JsonPath.read(json, "$[*]");
+        log.info("Parsed metrics into JSONArrays...");
+        for (Metric metric : metricUtil.getNonRatioMetrics()) {
+            JSONArray objects = jsonObjects.get(metric.getSource());
             for (Object o : objects) {
-                MetricDataset metricDataset = getMetricDataset(metric.getReportedPath());
-                if (metricDataset == null) metricDataset = new MetricDataset(metric, windowSize);
+                MetricDataset metricDataset = getMetricDataset(metric);
+                log.trace("Extracting values for " + metricDataset.getKey());
                 expandPathVariables(metricDataset, (JSONObject) o);
+
+                // Put absolute value into cache
                 putValue(metricDataset, (JSONObject) o);
+
+                // Put diff value into cache
                 putDiff(lastDataSet.get(metricDataset.getKey()), metricDataset);
             }
+        }
 
+        log.info("Starting to cache Ratio Metrics...");
+        for (Metric metric : metricUtil.getRatioMetrics()) {
+            RatioMetric ratioMetric = (RatioMetric) metric;
+            for (Object key : statsCache.getKeys()) {
+                Element element = statsCache.get((key));
+                if (element != null && element.getObjectValue() instanceof MetricDataset) {
+                    MetricDataset metricDataset = (MetricDataset) element.getObjectValue();
+                    if (metricDataset.getKey().contains(ratioMetric.getNumeratorCount())) {
+//                        log.info("Found match for '" + metricDataset.getKey() + "' and '"
+//                                + ratioMetric.getNumeratorCount() + "'");
+                        String denominatorKey = ratioMetric.isHitRatio() ?
+                                metricDataset.getKey().replace("Hit", "Miss") :
+                                metricDataset.getKey().replace("Miss", "Hit");
+                        String ratioKey = metricDataset.getKey().replace("Count", "Ratio");
+                        Element denominatorElement = statsCache.get(denominatorKey);
+                        if (denominatorElement != null && denominatorElement.getObjectValue() instanceof MetricDataset) {
+                            MetricDataset denominatorDataset = (MetricDataset) denominatorElement.getObjectValue();
+                            double numerator = metricDataset.getStatistics().getSum();
+                            double denominator = (metricDataset.getStatistics().getSum() + denominatorDataset.getStatistics().getSum());
+                            double ratio = denominator > 0 ? numerator / denominator : 0;
+                            MetricDataset ratioDataset = getMetricDataset(ratioMetric);
+                            ratioDataset.setActualVarReplaceMap(metricDataset.getActualVarReplaceMap());
+                            putValue(ratioDataset, ratio);
+                            log.info(metricDataset.getKey() + " / " + denominatorKey + ": " + numerator + " / " + denominator + " = " + ratio);
+                        }
+                    }
+                }
+            }
         }
         log.info("Done caching stats.");
     }
 
+    private Map<Metric.Source, JSONArray> toJsonArray(Map<Metric.Source, String> metricData) {
+        Map<Metric.Source, JSONArray> jsonObjects = new HashMap<Metric.Source, JSONArray>();
+        for (Metric.Source source : Metric.Source.values()) {
+            String json = metricData.get(source);
+            JSONArray objects = JsonPath.read(json, "$[*]");
+            jsonObjects.put(source, objects);
+        }
+        return jsonObjects;
+    }
+
     private void putValue(MetricDataset metricDataset, JSONObject jsonObject) {
         Object value = JsonPath.read(jsonObject, metricDataset.getMetric().getDataPath());
-        if (value instanceof Integer) metricDataset.addValue((Integer) value);
-        else if (value instanceof Double) metricDataset.addValue((Double) value);
-        else if (value instanceof Long) metricDataset.addValue((Long) value);
+        if (value instanceof Integer) putValue(metricDataset, (Integer) value);
+        else if (value instanceof Double) putValue(metricDataset, (Double) value);
+        else if (value instanceof Long) putValue(metricDataset, (Long) value);
         else if (value instanceof JSONArray) {
             JSONArray jsonArray = (JSONArray) value;
-            metricDataset.addValue(jsonArray.size());
+            putValue(metricDataset, jsonArray.size());
         }
         else {
             log.warn("Class " + value.getClass() + " not numeric.");
         }
+//        putMetricDataset(metricDataset);
+    }
+
+    private void putValue(MetricDataset metricDataset, double value) {
+        metricDataset.addValue(value);
         putMetricDataset(metricDataset);
     }
 
-    public MetricDataset getMetricDataset(String key) {
-        Element element = statsCache.get(key);
+    public MetricDataset getMetricDataset(Metric metric) {
+        Element element = statsCache.get(metric.getReportedPath());
         if (element != null) return (MetricDataset) element.getObjectValue();
-        else return null;
+        else return new MetricDataset(metric, windowSize);
     }
 
     public void putMetricDataset(MetricDataset metricDataset) {
