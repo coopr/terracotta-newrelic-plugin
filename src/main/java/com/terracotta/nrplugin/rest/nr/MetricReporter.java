@@ -20,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -90,27 +91,31 @@ public class MetricReporter extends RestClientBase {
 
     @Scheduled(fixedDelay=30000, initialDelay = 5000)
     public void reportMetrics() {
-        NewRelicPayload newRelicPayload = new NewRelicPayload(
-                new Agent(hostname, pid, version),
-                Collections.singletonList(
-                        new Component(name, guid, 30, metricProvider.getAllMetrics())));
-        log.info("Attempting to report stats to NewRelic...");
-        if (log.isDebugEnabled()) {
-            try {
-                log.debug("Payload: " + new ObjectMapper().writeValueAsString(newRelicPayload));
-            } catch (JsonProcessingException e) {
-                log.error("Error serializing payload.", e);
+        try {
+            NewRelicPayload newRelicPayload = new NewRelicPayload(
+                    new Agent(hostname, pid, version),
+                    Collections.singletonList(
+                            new Component(name, guid, 30, metricProvider.getAllMetrics())));
+            log.info("Attempting to report stats to NewRelic...");
+            if (log.isDebugEnabled()) {
+                try {
+                    log.debug("Payload: " + new ObjectMapper().writeValueAsString(newRelicPayload));
+                } catch (JsonProcessingException e) {
+                    log.error("Error serializing payload.", e);
+                }
             }
-        }
 
-        HttpHeaders requestHeaders = new HttpHeaders();
-        requestHeaders.set(X_LICENSE_KEY, licenseKey);
-        requestHeaders.set(org.apache.http.HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
-        requestHeaders.set(org.apache.http.HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
-        HttpEntity<NewRelicPayload> requestEntity = new HttpEntity<NewRelicPayload>(newRelicPayload, requestHeaders);
-        HttpEntity<String> response = restTemplate.exchange(nrUrl, HttpMethod.POST, requestEntity, String.class);
-        log.debug("Received response: " + response);
-        log.info("Done reporting to NewRelic.");
+            HttpHeaders requestHeaders = new HttpHeaders();
+            requestHeaders.set(X_LICENSE_KEY, licenseKey);
+            requestHeaders.set(org.apache.http.HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+            requestHeaders.set(org.apache.http.HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
+            HttpEntity<NewRelicPayload> requestEntity = new HttpEntity<NewRelicPayload>(newRelicPayload, requestHeaders);
+            HttpEntity<String> response = restTemplate.exchange(nrUrl, HttpMethod.POST, requestEntity, String.class);
+            log.debug("Received response: " + response);
+            log.info("Done reporting to NewRelic.");
+        } catch (Exception e) {
+            log.error("Error while attempting to publish stats to NewRelic.", e);
+        }
     }
 
 }

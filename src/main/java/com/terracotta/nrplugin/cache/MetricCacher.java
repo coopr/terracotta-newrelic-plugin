@@ -71,7 +71,7 @@ public class MetricCacher {
                 putValue(metricDataset, (JSONObject) o);
 
                 // Put diff value into cache
-                putDiff(lastDataSet.get(metricDataset.getKey()), metricDataset);
+//                putDiff(lastDataSet.get(metricDataset.getKey()), metricDataset);
             }
         }
 
@@ -98,7 +98,8 @@ public class MetricCacher {
                             MetricDataset ratioDataset = getMetricDataset(ratioMetric);
                             ratioDataset.setActualVarReplaceMap(metricDataset.getActualVarReplaceMap());
                             putValue(ratioDataset, ratio);
-                            log.info(metricDataset.getKey() + " / " + denominatorKey + ": " + numerator + " / " + denominator + " = " + ratio);
+//                            putDiff(lastDataSet.get(ratioDataset.getKey()), ratioDataset);
+                            log.trace(metricDataset.getKey() + " / " + denominatorKey + ": " + numerator + " / " + denominator + " = " + ratio);
                         }
                     }
                 }
@@ -135,6 +136,7 @@ public class MetricCacher {
     private void putValue(MetricDataset metricDataset, double value) {
         metricDataset.addValue(value);
         putMetricDataset(metricDataset);
+        putDiff(lastDataSet.get(metricDataset.getKey()), metricDataset);
     }
 
     public MetricDataset getMetricDataset(Metric metric) {
@@ -172,7 +174,7 @@ public class MetricCacher {
             diffs.put(MetricUtil.NEW_RELIC_MIN, latest.getStatistics().getMin() - previous.getStatistics().getMin());
             diffs.put(MetricUtil.NEW_RELIC_MAX, latest.getStatistics().getMax() - previous.getStatistics().getMax());
             diffs.put(MetricUtil.NEW_RELIC_TOTAL, latest.getStatistics().getSum() - previous.getStatistics().getSum());
-            diffs.put(MetricUtil.NEW_RELIC_COUNT, latest.getStatistics().getN() - previous.getStatistics().getN());
+            diffs.put(MetricUtil.NEW_RELIC_COUNT, 1);
             diffs.put(MetricUtil.NEW_RELIC_SUM_OF_SQUARES, latest.getStatistics().getSumsq() - previous.getStatistics().getSumsq());
 
             // Generate new key for diff rather than absolute

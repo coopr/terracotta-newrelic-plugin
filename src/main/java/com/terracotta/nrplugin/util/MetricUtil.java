@@ -28,6 +28,10 @@ public class MetricUtil {
 
     // Server metrics
     public static final String METRIC_LIVE_OBJECT_COUNT = "LiveObjectCount";
+    public static final String METRIC_WRITE_OPERATION_RATE = "WriteOperationRate";
+    public static final String METRIC_READ_OPERATION_RATE = "ReadOperationRate";
+    public static final String METRIC_EVICTION_RATE = "EvictionRate";
+    public static final String METRIC_EXPIRATION_RATE = "ExpirationRate";
     public static final String METRIC_MAX = "max";
     public static final String METRIC_USED = "used";
 
@@ -103,6 +107,14 @@ public class MetricUtil {
         // Server metrics
         metrics.add(new Metric("$.statistics." + METRIC_LIVE_OBJECT_COUNT,
                 toMetricPath(servers, "Data", "Objects", METRIC_LIVE_OBJECT_COUNT), Metric.Source.server, Metric.Unit.Count));
+        metrics.add(new Metric("$.statistics." + METRIC_WRITE_OPERATION_RATE,
+                toMetricPath(servers, "Data", "Rates", METRIC_WRITE_OPERATION_RATE), Metric.Source.server, Metric.Unit.Rate));
+        metrics.add(new Metric("$.statistics." + METRIC_READ_OPERATION_RATE,
+                toMetricPath(servers, "Data", "Rates", METRIC_READ_OPERATION_RATE), Metric.Source.server, Metric.Unit.Rate));
+        metrics.add(new Metric("$.statistics." + METRIC_EVICTION_RATE,
+                toMetricPath(servers, "Data", "Rates", METRIC_EVICTION_RATE), Metric.Source.server, Metric.Unit.Rate));
+        metrics.add(new Metric("$.statistics." + METRIC_EXPIRATION_RATE,
+                toMetricPath(servers, "Data", "Rates", METRIC_EXPIRATION_RATE), Metric.Source.server, Metric.Unit.Rate));
         metrics.add(new Metric("$.statistics.StorageStats.DATA." + METRIC_USED,
                 toMetricPath(servers, "OnHeap", "Bytes", METRIC_USED), Metric.Source.server, Metric.Unit.Bytes));
         metrics.add(new Metric("$.statistics.StorageStats.DATA." + METRIC_MAX,
