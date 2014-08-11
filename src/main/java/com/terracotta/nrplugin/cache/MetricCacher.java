@@ -54,7 +54,7 @@ public class MetricCacher {
     int windowSize;
 
     @Scheduled(fixedDelay=30000, initialDelay = 500)
-    public void cacheStats() {
+    public void cacheStats() throws Exception {
         log.info("Starting to cache all stats...");
         Map<Metric.Source, String> metricData = metricFetcher.getAllMetricData();
         Map<Metric.Source, JSONArray> jsonObjects = toJsonArray(metricData);
@@ -71,7 +71,7 @@ public class MetricCacher {
                 putValue(metricDataset, (JSONObject) o);
 
                 // Put diff value into cache
-//                putDiff(lastDataSet.get(metricDataset.getKey()), metricDataset);
+                putDiff(lastDataSet.get(metricDataset.getKey()), metricDataset);
             }
         }
 
@@ -98,7 +98,7 @@ public class MetricCacher {
                             MetricDataset ratioDataset = getMetricDataset(ratioMetric);
                             ratioDataset.setActualVarReplaceMap(metricDataset.getActualVarReplaceMap());
                             putValue(ratioDataset, ratio);
-//                            putDiff(lastDataSet.get(ratioDataset.getKey()), ratioDataset);
+                            putDiff(lastDataSet.get(ratioDataset.getKey()), ratioDataset);
                             log.trace(metricDataset.getKey() + " / " + denominatorKey + ": " + numerator + " / " + denominator + " = " + ratio);
                         }
                     }
@@ -136,7 +136,7 @@ public class MetricCacher {
     private void putValue(MetricDataset metricDataset, double value) {
         metricDataset.addValue(value);
         putMetricDataset(metricDataset);
-        putDiff(lastDataSet.get(metricDataset.getKey()), metricDataset);
+//        putDiff(lastDataSet.get(metricDataset.getKey()), metricDataset);
     }
 
     public MetricDataset getMetricDataset(Metric metric) {

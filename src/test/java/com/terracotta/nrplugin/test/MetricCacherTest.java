@@ -27,7 +27,7 @@ public class MetricCacherTest {
     MetricCacher metricCacher;
 
     @Test
-    public void test() {
+    public void test() throws Exception {
         log.info("Testing statsCacher...");
         metricCacher.cacheStats();
     }

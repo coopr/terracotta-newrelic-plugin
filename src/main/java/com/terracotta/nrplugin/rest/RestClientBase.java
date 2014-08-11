@@ -15,12 +15,9 @@ import org.springframework.web.client.RestTemplate;
  */
 public abstract class RestClientBase {
 
-    protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
     protected RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 
-    @Value("${com.saggs.terracotta.nrplugin.tmc.url}")
-    protected String tmcUrl;
 
     @Value("${com.saggs.terracotta.nrplugin.nr.url}")
     protected String nrUrl;

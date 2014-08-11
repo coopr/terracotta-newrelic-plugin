@@ -1,5 +1,6 @@
 package com.terracotta.nrplugin.test;
 
+import com.terracotta.nrplugin.app.ReportingConfig;
 import com.terracotta.nrplugin.app.RestConfig;
 import com.terracotta.nrplugin.pojo.tmc.CacheStatistics;
 import com.terracotta.nrplugin.pojo.tmc.ClientStatistics;
@@ -28,7 +29,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {RestConfig.class})
+@ContextConfiguration(classes = {ReportingConfig.class})
 public class MetricFetcherTest {
 
     final Logger log = LoggerFactory.getLogger(this.getClass());
@@ -37,7 +38,7 @@ public class MetricFetcherTest {
     MetricFetcher metricFetcher;
 
     @Test
-    public void test() {
+    public void test() throws Exception {
         log.info("Getting server stats...");
         List<ServerStatistics> serverStatisticsList = metricFetcher.getServerStatistics();
         log.info("Getting client stats...");
@@ -46,6 +47,8 @@ public class MetricFetcherTest {
         List<CacheStatistics> cacheStatisticsList = metricFetcher.getCacheStatistics();
         log.info("Done.");
     }
+
+
 
 //    @Test
     public void testUriBuilder() {
