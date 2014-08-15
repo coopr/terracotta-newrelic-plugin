@@ -5,6 +5,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -18,7 +19,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * Created by Jeff on 8/11/2014.
@@ -44,11 +44,12 @@ public class BaseTmcClient {
 
 	public RestTemplate getRestTemplate() throws Exception {
 		if (restTemplate == null) {
-			log.info("Attempting to log in to TMC...");
+			log.info("Attempting to log in to TMC at '" + tmcUrl + "'...");
 			BasicCookieStore cookieStore = new BasicCookieStore();
 			CloseableHttpClient httpclient = HttpClients.custom()
 					.setDefaultCookieStore(cookieStore)
 					.setRedirectStrategy(new LaxRedirectStrategy())
+					.setHostnameVerifier(new AllowAllHostnameVerifier())
 					.build();
 			String loginUrl = tmcUrl + "/login.jsp";
 			HttpUriRequest login = RequestBuilder.post()

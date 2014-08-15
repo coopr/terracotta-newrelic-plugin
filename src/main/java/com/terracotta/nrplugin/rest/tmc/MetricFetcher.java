@@ -5,38 +5,23 @@ import com.terracotta.nrplugin.pojo.tmc.CacheStatistics;
 import com.terracotta.nrplugin.pojo.tmc.ClientStatistics;
 import com.terracotta.nrplugin.pojo.tmc.ServerStatistics;
 import com.terracotta.nrplugin.pojo.tmc.Topologies;
-import com.terracotta.nrplugin.rest.RestClientBase;
 import com.terracotta.nrplugin.util.MetricUtil;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -103,35 +88,6 @@ public class MetricFetcher extends BaseTmcClient {
 		return doGet(uriPath, clazz, null);
 	}
 
-//	public RestTemplate getNewRestTemplate() throws Exception {
-//		log.info("Attempting to log in to TMC...");
-//		BasicCookieStore cookieStore = new BasicCookieStore();
-//		CloseableHttpClient httpclient = HttpClients.custom()
-//				.setDefaultCookieStore(cookieStore)
-//				.setRedirectStrategy(new LaxRedirectStrategy())
-//				.build();
-//
-//		// Attempt request
-////		HttpGet httpget = new HttpGet(url);
-////		CloseableHttpResponse response1 = httpclient.execute(httpget);
-////		HttpEntity entity = response1.getEntity();
-////		EntityUtils.consume(entity);
-//
-//		String loginUrl = tmcUrl + "/login.jsp";
-//		HttpUriRequest login = RequestBuilder.post()
-//				.setUri(new URI(loginUrl))
-//				.addParameter("username", tmcUsername)
-//				.addParameter("password", tmcPassword)
-//				.build();
-//		CloseableHttpResponse loginResponse = httpclient.execute(login);
-//		HttpEntity loginResponseEntity = loginResponse.getEntity();
-//		EntityUtils.consume(loginResponseEntity);
-//		if (HttpStatus.SC_OK == loginResponse.getStatusLine().getStatusCode()) {
-//			return new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpclient));
-//		}
-//		else throw new IOException("Could not authenticate to TMC.");
-//	}
-
 	public String getServerStatisticsAsString() throws Exception {
 		return (String) doGet("/api/agents/statistics/servers/", String.class);
 	}
@@ -170,29 +126,6 @@ public class MetricFetcher extends BaseTmcClient {
 				.addParameters(params.toArray(new NameValuePair[params.size()]))
 				.build();
 		return request.getURI().toString();
-
-//		String url = baseUrl;
-//		for (Object o : params.entrySet()) {
-//			Map.Entry entry = (Map.Entry) o;
-//			String key = (String) entry.getKey();
-//			Object val = entry.getValue();
-//			if (val instanceof Collection) {
-//				Collection<String> values = (Collection<String>) val;
-//				for (String multiVal : values) {
-//					url = addParam(url, key, multiVal);
-//				}
-//			}
-//			else {
-//				url = addParam(url, key, (String) val);
-//			}
-//		}
-//		return url;
 	}
 
-//	private String addParam(String url, String key, String val) {
-//		String ret = url;
-//		ret += ret.contains("?") ? "&" : "?";
-//		ret += key + "=" + val;
-//		return ret;
-//	}
 }
