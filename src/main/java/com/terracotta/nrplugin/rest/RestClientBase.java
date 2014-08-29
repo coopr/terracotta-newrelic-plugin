@@ -16,10 +16,4 @@ import org.springframework.web.client.RestTemplate;
 public abstract class RestClientBase {
 
 
-    protected RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
-
-
-    @Value("${com.saggs.terracotta.nrplugin.nr.url}")
-    protected String nrUrl;
-
 }

@@ -53,7 +53,7 @@ public class MetricCacher {
     @Value("${com.saggs.terracotta.nrplugin.data.windowSize}")
     int windowSize;
 
-    @Scheduled(fixedDelay=30000, initialDelay = 500)
+	@Scheduled(fixedDelayString = "${com.saggs.terracotta.nrplugin.tmc.executor.fixedDelay.milliseconds}", initialDelay = 500)
     public void cacheStats() throws Exception {
         log.info("Starting to cache all stats...");
         Map<Metric.Source, String> metricData = metricFetcher.getAllMetricData();
